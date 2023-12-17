@@ -2,8 +2,9 @@
 //-------------------------------------------------------------------------------------------
 require 'config.php';
 
+
 $db;
-	$sql = "SELECT * FROM tbl_temperature ORDER BY id DESC LIMIT 15";
+	$sql = "SELECT * FROM tbl_data ORDER BY id DESC LIMIT 15";
 	$result = $db->query($sql);
 	if (!$result) {
 	  { echo "Error: " . $sql . "<br>" . $db->error; }
@@ -79,6 +80,12 @@ $db;
         <th scope="col">#</th>
         <th scope="col">Temperature</th>
         <th scope="col">Humidity</th>
+        <th scope="col">Light Intensity</th>
+        <th scope="col">Rain</th>
+        <th scope="col">Wind</th>
+        <th scope="col">Soil Moisture</th>
+        <th scope="col">Battery Percentage</th>
+        <th scope="col">Battery Status</th>
         <th scope="col">date time</th>
       </tr>
     </thead>
@@ -88,6 +95,12 @@ $db;
         <th scope="row"><?php echo $i++;?></th>
         <td><?PHP echo $row['temperature'];?></td>
         <td><?PHP echo $row['humidity'];?></td>
+        <td><?PHP echo $row['light_intensity'];?></td>
+        <td><?PHP echo $row['rain'];?></td>
+        <td><?PHP echo $row['wind'];?></td>
+        <td><?PHP echo $row['soil_moisture'];?></td>
+        <td><?PHP echo $row['battery_percentage'];?></td>
+        <td><?PHP echo $row['battery_status'];?></td>
         <td><?PHP echo date("Y-m-d h:i: A", strtotime($row['created_date']));?></td>
       </tr>
     <?PHP } ?>

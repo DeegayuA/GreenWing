@@ -11,8 +11,8 @@ let weather__minmax = document.querySelector(".weather__minmax");
 let weather__realfeel = document.querySelector('.weather__realfeel');
 let weather__humidity = document.querySelector('.weather__humidity');
 let weather__wind = document.querySelector('.weather__wind');
+let weather__rain = document.querySelector('.weather__rain');
 let weather__pressure = document.querySelector('.weather__pressure');
-let weather__lasttime = document.querySelector('.weather__lasttime');
 
 // search
 document.querySelector(".weather__search").addEventListener('submit', e => {
@@ -73,15 +73,30 @@ function getWeather() {
             // console.log(data);
             city.innerHTML = `${data.name}, ${convertCountryCode(data.sys.country)}`;
             datetime.innerHTML = convertTimeStamp(data.dt, data.timezone); 
-        weather__lasttime.innerHTML = convertTimeStamp(data.dt, data.timezone);
             weather__forecast.innerHTML = `<p>${data.weather[0].main}`;
             weather__temperature.innerHTML = `${data.main.temp.toFixed()}&#176`;
             weather__icon.innerHTML = `<img src="http://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png" />`;
             weather__minmax.innerHTML = `<p>Min: ${data.main.temp_min.toFixed()}&#176;</p><p>Max: ${data.main.temp_max.toFixed()}&#176;</p>`;
             weather__realfeel.innerHTML = `${data.main.feels_like.toFixed()}&#176 C`;
             weather__humidity.innerHTML = `${data.main.humidity} %`;
-            weather__wind.innerHTML = `${data.wind.speed} ${units === "imperial" ? "mph" : "m/s"}`;
             weather__pressure.innerHTML = `${data.main.pressure} hPa`;
+
+            let windSpeed = data.wind.speed;
+            if (units === "metric") {
+                // Convert from m/s to km/h
+                windSpeed = windSpeed * 3.6;
+                weather__wind.innerHTML = `${windSpeed.toFixed(2)} km/h`;
+            } else {
+                // Imperial units, display in mph
+                weather__wind.innerHTML = `${windSpeed} mph`;
+            }
+
+            // Add rain volume
+            let rainVolume = 'No rain';
+            if (data.rain) {
+                rainVolume = data.rain['1h'] ? `${data.rain['1h']} mm/h` : (data.rain['3h'] ? `${data.rain['3h']} mm/h` : '0 mm/h');
+            }
+            weather__rain.innerHTML = `${rainVolume}`;
 
         });
 }

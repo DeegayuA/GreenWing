@@ -10,7 +10,7 @@ if (!$result) {
 $row = $result->fetch_assoc();
 
 $rows = $result -> fetch_all(MYSQLI_ASSOC);
-print_r($row);
+// print_r($row);
 
 header('Content-Type: application/json');
  

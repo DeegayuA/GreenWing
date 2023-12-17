@@ -1,5 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
+:root {
+    /* Light mode variables */
+    --background-color: #f0f0f0;
+    --container-background: #171717;
+    --text-color: #fff;
+    --input-background: #1e1e1e;
+    --card-background: #1e1e1e;
+    --hover-brightness: 1.1;
+}
+
+@media (prefers-color-scheme: dark) {
+    /* Dark mode variables */
+    :root {
+        --background-color: #121212;
+        --container-background: #262626;
+        --text-color: #efefef;
+        --input-background: #1e1e1e;
+        --card-background: #1e1e1e;
+        --hover-brightness: 1.2;
+    }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,9 +29,25 @@
     font-family: 'Poppins', sans-serif;
 }
 
+body {
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+
+
+.logo img{
+    position: absolute;
+    width: 100px;
+    height: auto;
+    margin: auto;
+    display: block;
+
+}
+
 .container {
-    background: #171717;
-    color: #fff;
+    background: var(--container-background);
+    color: var(--text-color);
     padding: 1rem;
     width: 40%;
     margin: 2rem auto;
@@ -24,15 +62,16 @@
 
 input {
     border: none;
-    background: #1e1e1e;
+    background: var(--input-background);
+    color: var(--text-color);
     outline: none;
-    color: #fff;
     padding: 0.5rem 2.5rem;
     border-radius: 5px;
 }
 
 input::placeholder {
-    color: #fff;
+    color: var(--text-color);
+    background-color: transparent;
 }
 
 .weather__search {
@@ -70,7 +109,7 @@ input::placeholder {
 }
 
 .weather__forecast {
-    background: #1e1e1e;
+    background: var(--card-background);
     display: inline-block;
     padding: 0.5rem 1rem;
     border-radius: 30px;
@@ -104,14 +143,21 @@ input::placeholder {
 .weather__card {
     display: flex;
     align-items: center;
-    background: #1e1e1e;
+    background: var(--card-background);
     padding: 1rem;
     border-radius: 10px;
+    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
 }
 
 .weather__card i {
     font-size: 1.5rem;
     margin-right: 1rem;
+}
+
+.weather__card:hover {
+    filter: brightness(var(--hover-brightness)) saturate(1.2)  contrast(1.2);
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
 }
 
 .weather__card p {
@@ -130,11 +176,17 @@ input::placeholder {
     .weather__units {
         margin-top: 1rem;
     }
+    .logo img{
+        width: 75px;
+    }
 }
 
 
 @media(max-width: 400px){
     .weather__info {
         grid-template-columns: none;
+    }
+    .logo img{
+        width: 50px;
     }
 }

@@ -32,15 +32,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
-
-
-?>
 <!DOCTYPE html>
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
   <title>Register data</title>
-  <meta http-equiv="refresh" content="4;url=home.html" />
+    <link rel="stylesheet" href="./loader.css">
+
+  <meta http-equiv="refresh" content="1;url=login.html"/>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 </head>
 <body>

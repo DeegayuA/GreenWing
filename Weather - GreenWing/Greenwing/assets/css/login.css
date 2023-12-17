@@ -1,0 +1,305 @@
+
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+  :root {
+    --background-color: #f4f4f4; /* Default light mode background */
+    --text-color: #333; /* Default text color for light mode */
+    --error-background: #e00; /* Default error background for light mode */
+    --error-text: #fff; /* Default error text color for light mode */
+    --card-background: #fff; /* Default card background for light mode */
+    --input-background: #f9f9f9; /* Default input field background for light mode */
+    --input-border: #ddd; /* Default input border color for light mode */
+    --input-text: #333; /* Default input text color for light mode */
+    --button-background: #4CAF50; /* Default button background color */
+    --button-text: #fff; /* Default button text color */
+    --link-text: #4CAF50; /* Default link text color */
+    --card-background-transparent: rgba(255, 255, 255, 0.5);
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background-color: #121212; /* Dark mode background */
+      --text-color: #ccc; /* Dark mode text color */
+      --error-background: #e00; /* Dark mode error background */
+      --error-text: #fff; /* Dark mode error text color */
+      --card-background: #222; /* Dark mode card background */
+      --input-background: #333; /* Dark mode input field background */
+      --input-border: #444; /* Dark mode input border color */
+      --input-text: #ccc; /* Dark mode input text color */
+      --button-background: #76ff7b; /* Dark mode button background color */
+      --button-text: #333; /* Dark mode button text color */
+      --link-text: #76ff7b; /* Dark mode link text color */
+      --card-background-transparent:rgba(0, 0, 0, 0.5);
+
+    }
+  }
+
+  
+  body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+  }
+  
+  .login-side {
+    background: var(--card-background);
+  }
+  
+  .error {
+    background-color: var(--error-background);
+    color: var(--error-text);
+  }
+  
+  #loginForm input[type="text"],
+  #loginForm input[type="password"] {
+    background-color: var(--input-background);
+    border: 1px solid var(--input-border);
+    color: var(--input-text);
+  }
+  
+  #loginForm button.login-button {
+    background-color: var(--button-background);
+    color: var(--button-text);
+  }
+  
+  #loginForm a {
+    color: var(--link-text);
+  }
+  
+  /* Add other element styles here, using the defined CSS variables */
+  
+
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .card {
+    width: 800px;
+    height: max-content;
+    display: flex;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0px 20px rgba(0, 0, 0, 0.2);
+  }
+  .video-side {
+    flex: 2; /* more space for video side */
+    position: relative;
+  }
+  .video-side video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .video-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    z-index: 2;
+    width: 80%;
+    text-shadow: red;
+  }
+  .signup-section {
+    position: absolute;
+    width: 90%; /* Subtract 1rem from the full width */
+    bottom: 1rem;
+    left: 50%; /* Position the left edge to the center */
+    transform: translateX(-50%); /* Shift it to the left by half of its own width */
+    background: var(--card-background-transparent); /* Semi-transparent background */
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .signup-section p {
+    color: var(--text-color);
+    margin: 0 1rem;
+    font-size: 1em;
+  }
+  .signup-section button {
+    background-color: var(--button-background);
+    color: var(--button-text) !important;
+    border: none;
+    padding: 1rem 2rem;
+    cursor: pointer;
+    border-radius: 5px;
+    margin-left: 10px; /* Spacing between text and button */
+  }
+
+  button.login-button, .signup-section button {
+    transition: all 0.3s ease; 
+    filter: contrast(100%);
+  }
+  
+  button.login-button:hover, .signup-section button:hover {
+    transform: translateY(-2px); /* Slightly raise the button */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25); /* Add a stronger shadow for depth */
+    filter: brightness(110%) contrast(200%);
+  }
+
+  .login-side {
+    flex: 1;
+    background: var(--card-background);
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .login-side h2 {
+    color: var(--text-color);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .login-side form {
+    width: 100%;
+  }
+  button.login-button {
+    padding: 15px;
+    background: var(--button-background);
+    color: var(--text-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: auto; /* Adjust width to content */
+    max-width: 100%; /* Ensure it doesn't exceed the form width */
+  }
+  .logo {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically if needed */
+    width: 100%; /* Take the full width of the container */
+  }
+
+  .logo img {
+    max-width: 100%; /* Ensure the logo is responsive and fits well */
+    height: auto;
+    margin-bottom: 1rem;
+  }
+  
+  .error {
+    display: none; /* Initially hidden */
+    color: var(--error-text);
+    background-color: var(--error-background);
+    padding: 0.5rem;
+    width: 100%;
+    text-align: center;
+    border-radius: 0.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  #loginForm {
+    width: 100%;
+  }
+  
+  #loginForm input[type="text"],
+  #loginForm input[type="password"] {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--button-background);
+    border-radius: 0.5rem;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  }
+  
+  #loginForm button.login-button {
+    width: 100%;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #4CAF50;
+    color: var(--button-text);
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+  
+  #loginForm button.login-button:hover {
+    background-color: #45a049;
+  }
+  
+  #loginForm .forgot-password {
+    color: var(--text-color);
+    text-align: center;
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.8em;
+  }
+  #loginForm .forgot-password .span{
+    color: #4CAF50;
+  }
+
+  @media (max-width: 768px) {
+    .card {
+      width: 95vw;
+      flex-direction: column;
+      box-shadow: none;
+    }
+  
+    .video-side {
+      width: 100%;
+      height: 40vh;
+      border-radius: 1rem !important;
+    }
+  
+    .video-side video {
+      position: static;
+      width: 100%;
+      height: inherit;
+      border-radius: 1rem !important;
+    }
+  
+    .video-content {
+        position: absolute;
+        top: 30%;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1rem 0;
+    }
+  
+    .signup-section {
+      width: calc(100% - 4rem);
+      bottom: 1.5rem;
+      left: 1rem;
+      transform: none;
+      flex-direction: column;
+      text-align: center;
+      padding: 1rem;
+    }
+  
+    .signup-section p {
+      margin-bottom: 1rem;
+    }
+  
+    .signup-section button {
+      width: 100%;
+      padding: 1rem;
+      margin: 0;
+    }
+  
+    .login-side {
+      background-color: var(--background-color);
+      width: 100%;
+      padding: 1rem;
+    }
+    .login-side h2{
+        margin: 1rem;
+    }
+  
+    #loginForm input[type="text"],
+    #loginForm input[type="password"],
+    #loginForm button.login-button {
+      padding: 1rem;
+      width: 90vw;
+    }
+  
+    .logo img {
+      width: 100px;
+    }
+  }
+  

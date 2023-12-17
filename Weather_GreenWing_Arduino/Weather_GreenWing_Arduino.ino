@@ -29,7 +29,7 @@ const float VOLTAGE_THRESHOLD = 0.1;  // Minimum voltage change considered as ch
 // WiFi and Server Constants
 const char* SSID = "Greenwing";
 const char* PASSWORD = "20010123";
-const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";
+const char* SERVER_NAME = "update_the_link/sensordata.php";
 String PROJECT_API_KEY = "GreenWing";
 
 // DHT Sensor

@@ -1,7 +1,5 @@
 <?php
 require 'config.php';
-define('PEPPER', 'GreeWingPepper');
-echo "register.php";
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
@@ -15,9 +13,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $conn->real_escape_string($_POST['email']);
     $password = $conn->real_escape_string($_POST['password']);
 
-    // Peppering and hashing the password
-    $passwordPeppered = hash_hmac('sha256', $password, PEPPER);
-    $passwordHash = password_hash($passwordPeppered, PASSWORD_DEFAULT);
+    // Hash the password
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
     // Prepare and bind
     $stmt = $conn->prepare("INSERT INTO tbl_users (username, email, password) VALUES (?, ?, ?)");
@@ -35,3 +32,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
+
+
+?>
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Register data</title>
+  <meta http-equiv="refresh" content="4;url=home.html" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+</head>
+<body>
+</body>
+</html>

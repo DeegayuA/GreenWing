@@ -4,7 +4,7 @@ define('DB_USERNAME', 'root');
 define('DB_PASSWORD', ''); 
 define('DB_NAME'    , '4381468_grounddb');
 
-define('POST_DATA_URL', 'https://localhost/greenwing/assets/php/sensordata.php');
+define('POST_DATA_URL', 'https://localhost/greenwing/sensordata.php');
 
 //PROJECT_API_KEY is the exact duplicate of, PROJECT_API_KEY in ESP32 sketch file
 //Both values must be same

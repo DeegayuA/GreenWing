@@ -187,6 +187,6 @@ input::placeholder {
         grid-template-columns: none;
     }
     .logo img{
-        width: 50px;
+        display: none;
     }
 }

@@ -1,5 +1,6 @@
 <?php
 require 'config.php';
+// print_r($_POST);
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
@@ -19,6 +20,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Prepare and bind
     $stmt = $conn->prepare("INSERT INTO tbl_users (username, email, password) VALUES (?, ?, ?)");
     $stmt->bind_param("sss", $username, $email, $passwordHash);
+      
+    
 
     // Execute and check if successful
     if ($stmt->execute()) {

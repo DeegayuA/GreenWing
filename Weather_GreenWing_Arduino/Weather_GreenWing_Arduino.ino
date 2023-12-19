@@ -25,11 +25,14 @@ const float FULL_SCALE = MAX_VOLTAGE - MIN_VOLTAGE;
 // Battery monitoring constants
 const int CHARGE_TIME = 60000;  // Time to check for charging (in milliseconds)
 const float VOLTAGE_THRESHOLD = 0.1;  // Minimum voltage change considered as charging (adjust as needed)
+float percentage = 0.0;
+String batteryStatus = "Unknown";
 
 // WiFi and Server Constants
 const char* SSID = "Greenwing";
 const char* PASSWORD = "20010123";
-const char* SERVER_NAME = "update_the_link/sensordata.php";
+const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";
+//const char* SERVER_NAME = "http://greenwing.scienceontheweb.net/sensordata.php
 String PROJECT_API_KEY = "GreenWing";
 
 // DHT Sensor
@@ -219,3 +222,4 @@ void uploadData() {
 
   // Print HTTP response code
   Serial.print("HTTP Response code: ");
+}

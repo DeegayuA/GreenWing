@@ -323,6 +323,7 @@ void readWindSpeed() {
     } else {
       Serial.println("Failed to read Wind Speed sensor!");
     }
+  } 
 }
 
 void printLocalTime() {

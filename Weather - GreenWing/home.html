@@ -126,7 +126,7 @@
             <div class="weather__card">
                 <i class="fa-solid fa-plug-circle-bolt"></i>
                 <div>
-                    <p>Charging Status</p>
+                    <p>Circuit Power Status</p>
                     <p class="battery_charging">18&#176</p>
                 </div>
             </div> 
@@ -159,9 +159,9 @@
                 document.querySelector('.real-time-temp').textContent = data.temperature + '°C';
                 document.querySelector('.real-time-humidity').textContent = data.humidity + '%';
                 document.querySelector('.real__wind').textContent = data.wind + ' km/h';
-                document.querySelector('.real__rain').textContent = data.rain + ' mm/h';
+                document.querySelector('.real__rain').textContent = data.rain + ' %';
                 document.querySelector('.real__soil').textContent = data.soil_moisture + ' %';
-                document.querySelector('.real__sun').textContent = data.light_intensity+ ' Lumens';
+                document.querySelector('.real__sun').textContent = data.light_intensity+ ' %';
                 document.querySelector('.battery__level').textContent = data.battery_percentage + ' %';
                 document.querySelector('.battery_charging').textContent = data.battery_status;
                 // Assuming you have other elements to update, for example:

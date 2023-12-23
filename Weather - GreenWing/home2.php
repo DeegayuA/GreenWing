@@ -4,7 +4,7 @@ require 'config.php';
 
 
 $db;
-	$sql = "SELECT * FROM tbl_data ORDER BY id DESC LIMIT 15";
+	$sql = "SELECT * FROM tbl_data ORDER BY id DESC LIMIT 500";
 	$result = $db->query($sql);
 	if (!$result) {
 	  { echo "Error: " . $sql . "<br>" . $db->error; }
@@ -80,13 +80,13 @@ $db;
         <th scope="col">#</th>
         <th scope="col">Temperature</th>
         <th scope="col">Humidity</th>
-        <th scope="col">Light Intensity</th>
-        <th scope="col">Rain</th>
+        <th scope="col">Light Intensity (%)</th>
+        <th scope="col">Rain (%)</th>
         <th scope="col">Wind</th>
-        <th scope="col">Soil Moisture</th>
-        <th scope="col">Battery Percentage</th>
-        <th scope="col">Battery Status</th>
-        <th scope="col">date time</th>
+        <th scope="col">Soil Moisture (%)</th>
+        <th scope="col">Battery (%)</th>
+        <th scope="col">Circuit Status</th>
+        <th scope="col">Date Time</th>
       </tr>
     </thead>
     <tbody>
@@ -101,7 +101,7 @@ $db;
         <td><?PHP echo $row['soil_moisture'];?></td>
         <td><?PHP echo $row['battery_percentage'];?></td>
         <td><?PHP echo $row['battery_status'];?></td>
-        <td><?PHP echo date("Y-m-d h:i: A", strtotime($row['created_date']));?></td>
+        <td><?PHP echo date("Y-m-d h:i:s A", strtotime($row['created_date']));?></td>
       </tr>
     <?PHP } ?>
     </tbody>

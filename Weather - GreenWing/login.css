@@ -65,7 +65,8 @@
     color: var(--button-text);
   }
   
-  #loginForm a {
+  #loginForm a,
+  #RegisterForm a {
     color: var(--link-text);
   }
   
@@ -234,14 +235,16 @@
     background-color: #45a049;
   }
   
-  #loginForm .forgot-password {
+  #loginForm .forgot-password,
+  #RegisterForm .forgot-password {
     color: var(--text-color);
     text-align: center;
     display: block;
     margin-top: 1rem;
     font-size: 0.8em;
   }
-  #loginForm .forgot-password .span{
+  #loginForm .forgot-password .span,
+  #RegisterForm .forgot-password .span{
     color: #4CAF50;
   }
 

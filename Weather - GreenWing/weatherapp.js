@@ -1,4 +1,4 @@
-let currCity = "Kelaniya";
+let currCity = "";
 let units = "metric";
 
 // Selectors
@@ -101,10 +101,55 @@ function getWeather() {
         });
 }
 
-// Use an anonymous function to call getWeather on load
-document.addEventListener('DOMContentLoaded', () => {
-    getWeather();
-});
+// Function to get user's location
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+        console.log("Geolocation is not supported by this browser.");
+        getWeather(); // Call getWeather with the default city
+    }
+}
 
+// Handle successful geolocation
+function showPosition(position) {
+    const API_KEY = '7b78e7d85f470c2529df86e060e5b836'; // Replace with your actual API key
+    fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&limit=1&appid=${API_KEY}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.length > 0) {
+                currCity = data[0].name;
+            }
+            getWeather(); // Call getWeatherwith the obtained city or default city
+        })
+        .catch(err => {
+        console.error("Error with reverse geocoding: ", err);
+        getWeather(); // Call getWeather with the default city in case of an error
+        });
+        }
+        
+        // Handle geolocation errors
+        function showError(error) {
+        switch(error.code) {
+        case error.PERMISSION_DENIED:
+        console.log("User denied the request for Geolocation.");
+        break;
+        case error.POSITION_UNAVAILABLE:
+        console.log("Location information is unavailable.");
+        break;
+        case error.TIMEOUT:
+        console.log("The request to get user location timed out.");
+        break;
+        case error.UNKNOWN_ERROR:
+        console.log("An unknown error occurred.");
+        break;
+        }
+        getWeather(); // Call getWeather with the default city if there's an error
+        }
+        
+        // Event listener for DOMContentLoaded
+        document.addEventListener('DOMContentLoaded', () => {
+        getLocation(); // Try to get user's location on page load
+        });
 
 

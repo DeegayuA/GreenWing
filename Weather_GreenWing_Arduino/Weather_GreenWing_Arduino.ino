@@ -6,11 +6,15 @@
 #include <esp_adc_cal.h>
 #include <ArduinoOTA.h>
 #include <Preferences.h>
+#include <Arduino.h>
+#include <freertos/semphr.h>
 
 // Constants
 #define DEFAULT_VREF    1100        // Default VREF value for ADC calibration
 #define uS_TO_S_FACTOR  1000000     // Conversion from microseconds to seconds
-#define TIME_TO_SLEEP   51         // Time to sleep in seconds
+#define TIME_TO_SLEEP   107.5         // Time to sleep in seconds
+
+SemaphoreHandle_t syncSemaphore;
 
 // Pin Definitions
 #define MOS_PIN             26
@@ -24,7 +28,7 @@
 // Voltage thresholds
 const double MAX_VOLTAGE = 3.800;
 const double MIN_VOLTAGE = 2.800;
-const float VOLTAGE_THRESHOLD = 0.000001;  // Define a suitable threshold
+const float VOLTAGE_THRESHOLD = 0.0008056640625;  // Define a suitable threshold
 
 // OTA Credentials
 const char* OTA_HOSTNAME = "GreenWing";
@@ -62,28 +66,66 @@ int waterLevelValue = 0;
 int soilMoistureValue = 0;
 String PROJECT_API_KEY = "GreenWing";  // Replace with your actual API key
 //const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";  // Replace with your actual server name
-const char* SERVER_NAME = "http://greenwing.scienceontheweb.net/sensordata.php";
+const char* SERVER_NAME = "http://green-wing.scienceontheweb.net/sensordata.php";
 esp_adc_cal_characteristics_t *adc_chars;
 double batteryVoltage;
 float batteryPercentage = 0.0;
 String batteryStatus = "Unknown";
 
+void Core0Task(void *pvParameters) {
+  connectToWiFi();
+  setupOTA();
+  
+  for (;;) {
+    // Handle OTA updates
+    ArduinoOTA.handle();
+    // Other tasks for Core 0
+    xSemaphoreGive(syncSemaphore); // Signal completion
+    vTaskDelete(NULL); // End task
+    delay(500); 
+  }
+}
+void Core1Task(void *pvParameters) {
+  for (;;) {
+    readDHT();
+    readSensor(LDR_PIN, "LDR", ldrValue, true);
+    readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, false);
+    readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
+    readWindSpeed();
+    batteryMonitor();
+    xSemaphoreGive(syncSemaphore); // Signal completion
+    vTaskDelete(NULL); // End task
+    delay(500);
+  }
+}
+
+
+
 void setup() {
+  
   Serial.begin(115200);
   Serial.println("ESP32 serial initialized");
+//  Dual core selection
+  syncSemaphore = xSemaphoreCreateBinary();
+  // Check if semaphore creation was successful
+  if (syncSemaphore == NULL) {
+    Serial.println("Failed to create semaphore");
+  }
+  xTaskCreatePinnedToCore(Core0Task, "Core0Task", 10000, NULL, 1, NULL, 0); // Task for Core 0
+  xTaskCreatePinnedToCore(Core1Task, "Core1Task", 10000, NULL, 1, NULL, 1); // Task for Core 1
+
   adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
-
-  while (!Serial); 
-  Serial.println("Type word recalibrate for sensor recalibration");
-  checkForRecalibrationCommand();
-  delay(1000);  // Wait for 1 seconds
 
   // Initialize Wi-Fi
   connectToWiFi();
 
   // Initialize OTA
   setupOTA();
+  
+  while (!Serial);
+  Serial.println("Type word recalibrate for sensor recalibration");
+  checkForRecalibrationCommand();
 
   // Initialize a NTP client for Sri Lanka (UTC+5:30)
   // The offset is in seconds, so 5 hours and 30 minutes is 5*3600 + 30*60 = 19800 seconds
@@ -93,25 +135,26 @@ void setup() {
   // Increment boot count and print
   ++bootCount;
   Serial.println("Boot number: " + String(bootCount));
-  
-  // Initialize other components...
-    pinMode(MOS_PIN, OUTPUT); 
-    pinMode(DHT_PIN, INPUT);   
-    pinMode(LDR_PIN, INPUT); 
-    pinMode(WATER_LEVEL_PIN, INPUT); 
-    pinMode(SOIL_MOISTURE_PIN, INPUT);
-    pinMode(WIND_SENSOR_PIN, INPUT); 
-    pinMode(CHARGING_PIN, INPUT); 
-    dht.begin();
-    attachInterrupt(digitalPinToInterrupt(WIND_SENSOR_PIN), pulseCounter, FALLING);
 
+  // Initialize other components...
+  pinMode(MOS_PIN, OUTPUT);
+  pinMode(DHT_PIN, INPUT);
+  pinMode(LDR_PIN, INPUT);
+  pinMode(WATER_LEVEL_PIN, INPUT);
+  pinMode(SOIL_MOISTURE_PIN, INPUT);
+  pinMode(WIND_SENSOR_PIN, INPUT);
+  pinMode(CHARGING_PIN, INPUT);
+  dht.begin();
+  attachInterrupt(digitalPinToInterrupt(WIND_SENSOR_PIN), pulseCounter, FALLING);
+  delay(1000);  // Wait for 1 seconds
+  
   // Allow a short time window for OTA updates
   unsigned long startMillis = millis();
   while (millis() - startMillis < 2000) { // 5-second window for OTA
     ArduinoOTA.handle();
     delay(100); // Short delay to avoid blocking
   }
-  
+
   Serial.println("___________________________________");
   printLocalTime();
   digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
@@ -226,90 +269,107 @@ void readDHT() {
 }
 
 void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse) {
-     preferences.begin("calibration", false); // Open NVS in read-write mode
+  preferences.begin("calibration", false); // Open NVS in read-write mode
 
-    // Construct the key strings
-    String minKey = String(sensorName) + "_min";
-    String maxKey = String(sensorName) + "_max";
+   static int lastValue = -1;
+   static int sameValueCount = 0;
 
-    // Load calibration data from NVS
-    int minRawValue = preferences.getInt(minKey.c_str(), 4095);
-    int maxRawValue = preferences.getInt(maxKey.c_str(), 0);
+  // Construct the key strings
+  String minKey = String(sensorName) + "_min";
+  String maxKey = String(sensorName) + "_max";
 
-    pinMode(pin, INPUT);
-    int rawValue = analogRead(pin);
+  // Load calibration data from NVS
+  int minRawValue = preferences.getInt(minKey.c_str(), 4095);
+  int maxRawValue = preferences.getInt(maxKey.c_str(), 0);
 
-    // Update calibration data if needed
-    if (rawValue < minRawValue || rawValue > maxRawValue) {
-        minRawValue = min(minRawValue, rawValue);
-        maxRawValue = max(maxRawValue, rawValue);
+  pinMode(pin, INPUT);
+  int rawValue = analogRead(pin);
 
-        // Save updated calibration data to NVS
-        preferences.putInt(minKey.c_str(), minRawValue);
-        preferences.putInt(maxKey.c_str(), maxRawValue);
+  // Update calibration data if needed
+  if (rawValue < minRawValue || rawValue > maxRawValue) {
+    minRawValue = min(minRawValue, rawValue);
+    maxRawValue = max(maxRawValue, rawValue);
+
+    // Save updated calibration data to NVS
+    preferences.putInt(minKey.c_str(), minRawValue);
+    preferences.putInt(maxKey.c_str(), maxRawValue);
+  }
+
+  // Map the raw value to a 0-100 range based on the calibrated min-max range
+  int mappedValue = 0;
+  if (maxRawValue != minRawValue) { // Prevent division by zero
+    mappedValue = (rawValue - minRawValue) * 100 / (maxRawValue - minRawValue);
+  }
+
+  // Inverse the percentage if needed (for LDR)
+  if (inverse) {
+    mappedValue = 100 - mappedValue;
+  }
+
+  // Constrain the value to ensure it's within 0-100
+  sensorValue = constrain(mappedValue, 0, 100);
+
+  Serial.println(String(sensorName) + " Value: " + String(sensorValue) + "%");
+  
+  if (sensorValue == lastValue) {
+        sameValueCount++;
+        if (sameValueCount >= 5) {
+            resetCalibration(sensorName);
+            sameValueCount = 0;
+            Serial.println(String(sensorName) + " calibration reset.");
+        }
+    } else {
+        sameValueCount = 0;
     }
 
-    // Map the raw value to a 0-100 range based on the calibrated min-max range
-    int mappedValue = 0;
-    if (maxRawValue != minRawValue) { // Prevent division by zero
-        mappedValue = (rawValue - minRawValue) * 100 / (maxRawValue - minRawValue);
-    }
-
-    // Inverse the percentage if needed (for LDR)
-    if (inverse) {
-        mappedValue = 100 - mappedValue;
-    }
-
-    // Constrain the value to ensure it's within 0-100
-    sensorValue = constrain(mappedValue, 0, 100);
-    
-    Serial.println(String(sensorName) + " Value: " + String(sensorValue) + "%");
+    lastValue = sensorValue;
 }
 void resetCalibration(const char* sensorName) {
-    preferences.begin("calibration", false); // Open NVS in read-write mode
+  preferences.begin("calibration", false); // Open NVS in read-write mode
 
-    // Construct the key strings for min and max values
-    String minKey = String(sensorName) + "_min";
-    String maxKey = String(sensorName) + "_max";
+  // Construct the key strings for min and max values
+  String minKey = String(sensorName) + "_min";
+  String maxKey = String(sensorName) + "_max";
 
-    // Reset calibration values
-    preferences.putInt(minKey.c_str(), 4095); // Set to default max ADC value
-    preferences.putInt(maxKey.c_str(), 0);    // Set to default min ADC value
+  // Reset calibration values
+  preferences.putInt(minKey.c_str(), 4095); // Set to default max ADC value
+  preferences.putInt(maxKey.c_str(), 0);    // Set to default min ADC value
 
-    preferences.end();
+  preferences.end();
 
-    Serial.println(String(sensorName) + " calibration reset.");
+  Serial.println(String(sensorName) + " calibration reset.");
 }
 void checkForRecalibrationCommand() {
-    if (Serial.available() > 0) {
-        String input = Serial.readStringUntil('\n');
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
 
-        if (input.equalsIgnoreCase("recalibrate")) {
-            resetCalibration("LDR");
-            resetCalibration("Water Level");
-            resetCalibration("Soil Moisture");
-            // Add other sensors if necessary
+    if (input.equalsIgnoreCase("recalibrate")) {
+      resetCalibration("LDR");
+      resetCalibration("Water Level");
+      resetCalibration("Soil Moisture");
+      // Add other sensors if necessary
 
-            Serial.println("All sensors recalibrated.");
-        }
+      Serial.println("All sensors recalibrated.");
     }
+  }
+  delay(3000);  // Wait for 3 seconds
 }
 
 
 void IRAM_ATTR pulseCounter() {
-    pulseCount++;
-    lastPulseTime = millis();
+  pulseCount++;
+  lastPulseTime = millis();
 }
 
 float calculateWindSpeed(unsigned long pulseCount, unsigned long timeInterval) {
-    float rotations = pulseCount; 
-    float timeSeconds = timeInterval / 1000.0; 
-    return rotations / timeSeconds * CONVERSION_FACTOR;
+  float rotations = pulseCount;
+  float timeSeconds = timeInterval / 1000.0;
+  return rotations / timeSeconds * CONVERSION_FACTOR;
 }
 
 void readWindSpeed() {
   unsigned long currentTime = millis();
-  if(currentTime - lastPulseTime > 1000) {
+  if (currentTime - lastPulseTime > 1000) {
     noInterrupts();
     float localPulseCount = pulseCount;
     pulseCount = 0;
@@ -323,7 +383,7 @@ void readWindSpeed() {
     } else {
       Serial.println("Failed to read Wind Speed sensor!");
     }
-  } 
+  }
 }
 
 void printLocalTime() {
@@ -341,7 +401,7 @@ void batteryMonitor() {
   // Get calibrated ADC reading
   uint32_t adc_reading = analogRead(CHARGING_PIN);
   uint32_t millivolts = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars); // Calibrated reading
-  batteryVoltage = (float)millivolts / 1000.0 * 2 ; // Convert to volts -  *2 (voltage divider) 
+  batteryVoltage = (float)millivolts / 1000.0 * 2 ; // Convert to volts -  *2 (voltage divider)
 
   // Calculate battery percentage
   batteryPercentage = (batteryVoltage - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) * 100.000;
@@ -350,9 +410,9 @@ void batteryMonitor() {
   // Determine battery status
   static float lastVoltage = batteryVoltage; // Initialize with the current reading
   Serial.print("Current Voltage: ");
-  Serial.print(batteryVoltage,10);
+  Serial.print(batteryVoltage, 10);
   Serial.print("V, Last Voltage: ");
-  Serial.print(lastVoltage,10);
+  Serial.print(lastVoltage, 10);
   Serial.println("V");
 
   // Check for significant change

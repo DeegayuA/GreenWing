@@ -1,10 +1,10 @@
 <?php 
 define('DB_HOST'    , 'fdb1033.awardspace.net'); 
-define('DB_USERNAME', '4381468_grounddb'); 
-define('DB_PASSWORD', 'Deegayu2001'); 
-define('DB_NAME'    , '4381468_grounddb');
+define('DB_USERNAME', '4422103_greenwingdb'); 
+define('DB_PASSWORD', 'GreenWing@123'); 
+define('DB_NAME'    , '4422103_greenwingdb');
 
-define('POST_DATA_URL', 'http://greenwing.scienceontheweb.net/sensordata.php');
+define('POST_DATA_URL', 'http://green-wing.scienceontheweb.net/sensordata.php');
 
 //PROJECT_API_KEY is the exact duplicate of, PROJECT_API_KEY in NodeMCU sketch file
 //Both values must be same

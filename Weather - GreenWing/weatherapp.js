@@ -111,6 +111,21 @@ function getLocation() {
     }
 }
 
+// Function to get location based on IP address
+function getIPLocation() {
+    fetch('https://ipapi.co/json/') // Replace with your chosen IP geolocation service URL
+        .then(res => res.json())
+        .then(data => {
+            currCity = data.city || "Kelaniya"; // Use the city from IP location or default to "Kelaniya"
+            getWeather();
+        })
+        .catch(err => {
+            console.error("Error fetching IP-based location: ", err);
+            currCity = "Kelaniya"; // Default to "Kelaniya" in case of any error
+            getWeather();
+        });
+}
+
 // Handle successful geolocation
 function showPosition(position) {
     const API_KEY = '7b78e7d85f470c2529df86e060e5b836'; // Replace with your actual API key
@@ -133,15 +148,19 @@ function showPosition(position) {
         switch(error.code) {
         case error.PERMISSION_DENIED:
         console.log("User denied the request for Geolocation.");
+        getIPLocation(); 
         break;
         case error.POSITION_UNAVAILABLE:
         console.log("Location information is unavailable.");
+        getIPLocation(); 
         break;
         case error.TIMEOUT:
         console.log("The request to get user location timed out.");
+        getIPLocation(); 
         break;
         case error.UNKNOWN_ERROR:
         console.log("An unknown error occurred.");
+        getIPLocation(); 
         break;
         }
         getWeather(); // Call getWeather with the default city if there's an error

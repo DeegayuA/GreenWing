@@ -55,3 +55,4 @@ document.addEventListener("DOMContentLoaded", function() {
     setInterval(updateContent, 10000);
   });
   
+  

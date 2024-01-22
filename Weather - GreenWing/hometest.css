@@ -15,7 +15,7 @@
   --border-radius: 0.3rem; /* Equivalent to 8px for rounded corners */
 
   /* Sizing for elements */
-  --sidebar-width: 300px; /* Width of the sidebar */
+  --sidebar-width: 350px; /* Width of the sidebar */
   --header-height: 70px; /* Height of the header */
 
   /* Font sizing */
@@ -39,7 +39,7 @@
 
   .card,
   .chart,
-  .data {
+  .weather__card {
     background-color: #333 !important;
   }
 }
@@ -212,7 +212,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: calc(var(--primary-spacing) / 2);
+  padding: calc(var(--primary-spacing));
   background-color: var(--content-bg-color);
   height: var(--header-height);
 }
@@ -336,10 +336,19 @@ body {
 
 .card,
 .chart,
-.data {
+.weather__card{
   background-color: white;
   border-radius: var(--border-radius);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+.weather__card:hover,
+.card:hover,
+.chart:hover,
+.weather-card:hover,
+.weather-card-min:hover {
+    filter: brightness(var(--hover-brightness)) saturate(1.2)  contrast(1.2);
+    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.3);
 }
 .card {
   background-color: var(--sidebar-bg-color) !important;
@@ -399,7 +408,7 @@ body {
 
 /* Chart styles */
 .chart {
-  height: 350px;
+  height: 330px;
   min-width: 300px;
 }
 
@@ -413,14 +422,34 @@ body {
 
 /* Data styles */
 .data {
-  flex: 1;
-  height: 130px;
+  height: max-content;
+  flex: 4;
 }
 /* Weather styles */
 .weather2 {
   flex: 1;
   width: inherit;
   padding-bottom: var(--primary-spacing);
+}
+
+.weather__card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    flex: 1;
+}
+
+.weather__card i {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: var(--dark-text-color);
+}
+
+
+.weather__card span {
+    font-size: 14px;
+    color: var(--dark-text-color);
 }
 
 /* Mobile Responsiveness */
@@ -547,6 +576,7 @@ body {
   }
   .weather__gap{
     margin-left: 0;
+    margin-top: var(--primary-spacing);
   }
 
 }

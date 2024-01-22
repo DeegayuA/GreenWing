@@ -1,7 +1,6 @@
-// Declare currCity variable outside of functions
 let currCity = "";
+let allDescriptions = [];
 
-// Function to get user's location
 function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition, showError);
@@ -11,97 +10,67 @@ function getLocation() {
   }
 }
 
-// Function to get location based on IP address
 function getIPLocation() {
-  fetch("https://ipapi.co/json/") // Replace with your chosen IP geolocation service URL
+  fetch("https://ipapi.co/json/")
     .then((res) => res.json())
     .then((data) => {
-      currCity = data.city || "Kelaniya"; // Use the city from IP location or default to "Kelaniya"
+      currCity = data.city || "Kelaniya";
       getWeather();
     })
-    .catch((err) => {
-      console.error("Error fetching IP-based location: ", err);
-      currCity = "Kelaniya"; // Default to "Kelaniya" in case of any error
-      getWeather();
-    });
+    .catch(handleLocationError);
 }
 
-// Handle successful geolocation
+function handleLocationError(err) {
+  console.error("Error fetching location: ", err);
+  currCity = "Kelaniya";
+  getWeather();
+}
+
 function showPosition(position) {
-  const API_KEY = "7b78e7d85f470c2529df86e060e5b836"; // Replace with your actual API key
-  fetch(
-    `https://api.openweathermap.org/geo/1.0/reverse?lat=${position.coords.latitude}&lon=${position.coords.longitude}&limit=1&appid=${API_KEY}`
-  )
+  const API_KEY = "7b78e7d85f470c2529df86e060e5b836";
+  fetchWeatherByCoords(position.coords.latitude, position.coords.longitude, API_KEY);
+}
+
+function fetchWeatherByCoords(latitude, longitude, apiKey) {
+  fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${latitude}&lon=${longitude}&limit=1&appid=${apiKey}`)
     .then((res) => res.json())
     .then((data) => {
-      if (data.length > 0) {
-        currCity = data[0].name;
-      }
-      getWeather(); // Call getWeather with the obtained city or default city
+      currCity = data.length > 0 ? data[0].name : currCity;
+      getWeather();
     })
     .catch((err) => {
       console.error("Error with reverse geocoding: ", err);
-      getWeather(); // Call getWeather with the default city in case of an error
+      getWeather();
     });
 }
 
-// Handle geolocation errors
 function showError(error) {
-  switch (error.code) {
-    case error.PERMISSION_DENIED:
-      console.log("User denied the request for Geolocation.");
-      getIPLocation();
-      break;
-    case error.POSITION_UNAVAILABLE:
-      console.log("Location information is unavailable.");
-      getIPLocation();
-      break;
-    case error.TIMEOUT:
-      console.log("The request to get user location timed out.");
-      getIPLocation();
-      break;
-    case error.UNKNOWN_ERROR:
-      console.log("An unknown error occurred.");
-      getIPLocation();
-      break;
-  }
-  getWeather(); // Call getWeather with the default city if there's an error
+  console.log("Geolocation error:", error.message);
+  getIPLocation();
 }
 
-// Event listener for DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
-  getLocation(); // Try to get user's location on page load
-
-  // Now that the DOM is fully loaded, add the event listener for the search form
-  document.querySelector(".weather__search").addEventListener("submit", (e) => {
-    let search = document.querySelector(".weather__search-input"); // Change to search input
-    // prevent default action
-    e.preventDefault();
-    // change current city
-    currCity = search.value;
-    // get weather forecast
-    getWeather();
-    // clear form
-    search.value = "";
-  });
+  getLocation();
+  document.querySelector(".weather__search").addEventListener("submit", handleSearch);
+  getWeather(); 
 });
 
-// Function to convert country code to name
+function handleSearch(e) {
+  e.preventDefault();
+  currCity = document.querySelector(".weather__search-input").value;
+  getWeather();
+  document.querySelector(".weather__search-input").value = "";
+}
+
 function convertCountryCode(country) {
   let regionNames = new Intl.DisplayNames(["en"], { type: "region" });
   return regionNames.of(country);
 }
 
-// Function to convert timestamp to formatted date and time with timezone
 function convertTimeStamp(timestamp, timezone) {
-  const convertTimezoneHours = Math.floor(timezone / 3600); // Whole hours
-  const convertTimezoneMinutes = Math.floor((timezone % 3600) / 60); // Remaining minutes
-
   const date = new Date(timestamp * 1000);
-
-  // Adjust the date with the time zone offset
-  date.setHours(date.getHours() + convertTimezoneHours);
-  date.setMinutes(date.getMinutes() + convertTimezoneMinutes);
+  const offsetMilliseconds = date.getTimezoneOffset() * 60 * 1000;
+  const localTime = date.getTime() + offsetMilliseconds + timezone * 1000;
 
   const options = {
     weekday: "long",
@@ -110,109 +79,247 @@ function convertTimeStamp(timestamp, timezone) {
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
-    timeZone: "UTC", // Use UTC to prevent double adjustment
+    timeZone: "UTC",
     hour12: false,
   };
 
-  const formattedDate = date.toLocaleString("en-US", options);
+  return new Date(localTime).toLocaleString("en-US", options);
+}
 
-  // Manually construct the time zone offset string
+function handleSnowAnimation() {
+  const weatherDiv = document.querySelector(".card__image");
+  let i = 0;
 
-  return `${formattedDate}`;
+  function addSnowflake() {
+    if (i < 100) {
+      const snowflake = createWeatherElement("div", "weather__snowflake");
+      setRandomPosition(snowflake);
+      setRandomSize(snowflake, 10, 10);
+      setRandomAnimationDuration(snowflake, 6, 10);
+
+      weatherDiv.appendChild(snowflake);
+      i++;
+      setTimeout(addSnowflake, 200);
+    }
+  }
+
+  addSnowflake();
+}
+function handlePrecipitationAnimation(type) {
+  const weatherDiv = document.querySelector(".card__image");
+  const rainContainer = document.querySelector(".weather__rain-container");
+  let totalDrops = type === "Rain" ? 100 : 50;
+
+  // // Remove existing rain elements
+  // removeWeatherAnimations(".weather__rain");
+  
+
+  function addDrop(i) {
+    if (i >= totalDrops) return;
+  
+    const drop = createWeatherElement("div", "weather__rain");
+    setRandomPosition(drop);
+  
+    // Set the angle of the raindrop's path
+    const angle = -20; // Adjust the angle as needed
+    drop.style.transform = `rotate(${angle}deg)`;
+  
+    if (type === "Rain") {
+      // Use rectangular raindrop
+      setRandomSize(drop, 2, 4, 20, 40);
+      setRandomAnimationDuration(drop, 0.5, 1);
+    } else {
+      setRandomSize(drop, 2, 4, 10, 15);
+      setRandomAnimationDuration(drop, 2, 3);
+    }
+  
+    rainContainer.appendChild(drop);
+  
+    // Remove the oldest drop if the total exceeds the limit
+    if (rainContainer.children.length > totalDrops) {
+      rainContainer.removeChild(rainContainer.children[0]);
+    }
+  
+    setTimeout(() => addDrop(i + 1), 50);
+  }  
+
+  addDrop(0);
+}
+
+
+
+
+function handleThunderstormAnimation() {
+  const weatherDiv = document.querySelector(".card__image");
+
+  function addLightningFlash() {
+    const lightningFlash = createWeatherElement("div", "weather__lightning-flash");
+    weatherDiv.appendChild(lightningFlash);
+
+    setTimeout(() => {
+      lightningFlash.remove();
+    }, 200);
+  }
+
+  function addRainDuringThunderstorm() {
+    handlePrecipitationAnimation("Rain");
+  }
+
+  function startThunderstormAnimation() {
+    addLightningFlash();
+    addRainDuringThunderstorm(0);
+    setTimeout(startThunderstormAnimation, 3000 + Math.random() * 3000);
+  }
+
+  startThunderstormAnimation();
+}
+
+
+function createWeatherElement(tagName, className) {
+  const element = document.createElement(tagName);
+  element.className = className;
+  return element;
+}
+
+function setRandomPosition(element) {
+  element.style.left = Math.random() * 100 + "%";
+  element.style.top = -10 + Math.random() * 20 + "%";
+}
+
+function setRandomSize(element, minWidth, maxWidth, minHeight, maxHeight) {
+  const width = Math.random() * (maxWidth - minWidth) + minWidth;
+  const height = Math.random() * (maxHeight - minHeight) + minHeight;
+  element.style.width = `${width}px`;
+  element.style.height = `${height}px`;
+}
+
+function setRandomAnimationDuration(element, minDuration, maxDuration) {
+  const duration = Math.random() * (maxDuration - minDuration) + minDuration;
+  element.style.animationDuration = `${duration}s`;
 }
 
 function getWeather() {
-  /* TIME & DATE */
   const apiKey = "7b78e7d85f470c2529df86e060e5b836";
   const url = `https://api.openweathermap.org/data/2.5/weather?q=${currCity}&appid=${apiKey}&units=metric`;
   const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${currCity}&appid=${apiKey}&units=metric`;
 
-
   fetch(url)
     .then((response) => response.json())
-    .then((data) => {
-      if (data.main && data.name && data.weather && data.weather.length > 0) {
-        const { main, name, weather } = data;
-        document.querySelector(".card__content__city").innerText = name;
-        document.querySelector(".card__temp--current").innerText = Math.round(
-          main.temp
-        );
-        document.querySelector("#min-temp").innerText = Math.round(
-          main.temp_min
-        );
-        document.querySelector("#max-temp").innerText = Math.round(
-          main.temp_max
-        );
-
-        let iconWeather;
-        const weatherBg = document.querySelector(".card__image");
-        switch (weather[0].main) {
-          case "Rain":
-            iconWeather = "card__image--rain";
-            break;
-          case "Clear":
-            iconWeather = "";
-            break;
-          case "Snow":
-            iconWeather = "fa-snowflake";
-            break;
-          case "Clouds":
-            iconWeather = "card__image--cloudy";
-            break;
-          case "Drizzle":
-            iconWeather = "card__image--drizzle";
-            break;
-          case "Thunderstorm":
-            iconWeather = "card__image--rain";
-            break;
-          default:
-            iconWeather = "";
-        }
-        weatherBg.className = "card__image"; // Remove previous classes
-        if (iconWeather) {
-          weatherBg.classList.add(iconWeather);
-        }
-
-        // Get user's time zone offset in seconds
-        const timeZoneOffset = data.timezone;
-
-        // Get the timestamp and convert it to a formatted date and time with timezone
-        const timestamp = data.dt;
-        const formattedTime = convertTimeStamp(timestamp, timeZoneOffset);
-
-        // Write date and time to HTML
-        document.querySelector(".details__time").innerText = formattedTime;
-      } else {
-        console.error(
-          "Error: Invalid data received from the API. Data :" +
-            JSON.stringify(data)
-        );
-      }
-    })
+    .then(handleWeatherData)
     .catch((error) => {
-      console.error("Error:", error);
+      console.error("Error fetching weather data:", error);
     });
 
-  // Fetch the 5-day forecast
   fetch(forecastUrl)
-        .then(response => response.json())
-        .then(data => {
-            if (data.list && data.list.length > 0) {
-                for (let i = 1; i <= 3; i++) {
-                    const forecastIndex = i * 8 - 1; 
-                    const dayForecast = data.list[forecastIndex];
-                    const date = new Date(dayForecast.dt_txt);
-
-                    // Update HTML for each day
-                    document.querySelector(`.day${i + 1} .weather-card-min__info__condition`).innerText = dayForecast.weather[0].main;
-                    document.querySelector(`.day${i + 1} .weather-card-min__weather__temp`).innerText = `${Math.round(dayForecast.main.temp)}° C`;
-                    document.querySelector(`.day${i + 1} .weather-card-min__info__date2`).innerText = date.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
-
-                    // Set icon for each day in the forecast
-                    const forecastIconUrl = `http://openweathermap.org/img/wn/${dayForecast.weather[0].icon}@4x.png`;
-document.querySelector(`.day${i + 1} .weather-card-min__icon`).innerHTML = `<img src="${forecastIconUrl}" class="weather-icon" />`;
-                }
-            }
-        })
-        .catch(error => console.error("Error:", error));
+    .then((response) => response.json())
+    .then(handleForecastData)
+    .catch((error) => {
+      console.error("Error fetching forecast data:", error);
+    });
 }
+
+function handleWeatherData(data) {
+  if (data.main && data.name && data.weather && data.weather.length > 0) {
+    const { main, name, weather, dt, timezone } = data;
+    allDescriptions = data.weather.map((w) => w.description);
+    updateWeatherDisplay(name, main.temp, main.temp_min, main.temp_max, weather[0].main, dt, timezone);
+    updateWeatherBackground(weather[0].main);
+  } else {
+    console.error("Error: Invalid data received from the API. Data:", JSON.stringify(data));
+  }
+}
+
+function updateWeatherDisplay(city, temp, minTemp, maxTemp, condition, timestamp, timezone) {
+  document.querySelector(".card__content__city").innerText = city;
+  document.querySelector(".card__temp--current").innerText = Math.round(temp);
+  document.querySelector("#min-temp").innerText = Math.round(minTemp);
+  document.querySelector("#max-temp").innerText = Math.round(maxTemp);
+
+  const formattedTime = convertTimeStamp(timestamp, timezone);
+  document.querySelector(".details__time").innerText = formattedTime;
+}
+
+function updateWeatherBackground(weatherCondition) {
+  const weatherBg = document.querySelector(".card__image");
+  weatherBg.className = "card__image";
+
+  // weatherCondition = "Clear"
+
+  switch (weatherCondition) {
+    case "Rain":
+      weatherBg.classList.add("card__image--rain");
+      handlePrecipitationAnimation("Rain");
+      break;
+    case "Drizzle":
+      weatherBg.classList.add("card__image--drizzle");
+      handlePrecipitationAnimation("Drizzle");
+      break;
+    case "Clear":
+      const clouds = document.querySelectorAll(".weather__cloud--big, .weather__cloud");
+      clouds.forEach(cloud => {
+        cloud.style.display = 'none'; // or cloud.remove();
+      });
+      break;
+    case "Snow":
+      weatherBg.classList.add("card__image--snow");
+      handleSnowAnimation();
+      break;
+    case "Clouds":
+      weatherBg.classList.add("card__image--cloudy");
+      break;
+    case "Thunderstorm":
+      weatherBg.classList.add("card__image--rain");
+      handleThunderstormAnimation();
+      break;
+    default:
+      // No additional class for other weather conditions
+  }
+
+  // Remove rain and snow animations if it's not "Rain", "Drizzle", or "Snow"
+  if (["Rain", "Drizzle", "Snow", "Thunderstorm"].indexOf(weatherCondition) === -1) {
+    removeWeatherAnimations(".weather__rain");
+    removeWeatherAnimations(".weather__snowflake");
+  }
+}
+
+function removeWeatherAnimations(selector) {
+  const elements = document.querySelectorAll(selector);
+  elements.forEach((element) => {
+    element.remove();
+  });
+}
+
+function handleForecastData(data) {
+  if (data.list && data.list.length > 0) {
+    for (let i = 1; i <= 4; i++) {
+      const forecastIndex = i * 8 - 1;
+      const dayForecast = data.list[forecastIndex];
+      const date = new Date(dayForecast.dt_txt);
+
+      updateForecastCard(i, dayForecast.weather[0].main, dayForecast.main.temp, date);
+      updateForecastIcon(i, dayForecast.weather[0].icon);
+    }
+  }
+}
+
+function updateForecastCard(dayIndex, condition, temperature, date) {
+  const dayElement = document.querySelector(`.day${dayIndex + 1}`);
+  if (dayElement) {
+    dayElement.querySelector(".weather-card-min__info__condition").innerText = condition;
+    dayElement.querySelector(".weather-card-min__weather__temp").innerText = `${Math.round(temperature)}° C`;
+    dayElement.querySelector(".weather-card-min__info__date2").innerText = date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    });
+  }
+}
+
+function updateForecastIcon(dayIndex, iconCode) {
+  const forecastIconUrl = `http://openweathermap.org/img/wn/${iconCode}@4x.png`;
+  const iconElement = document.querySelector(`.day${dayIndex + 1} .weather-card-min__icon`);
+  if (iconElement) {
+    iconElement.innerHTML = `<img src="${forecastIconUrl}" class="weather-icon" />`;
+  }
+}
+

@@ -82,34 +82,12 @@
                                 </div>
                                 <div class="weather__cloud"></div>
                                 <div class="weather__cloud weather__cloud--big"></div>
-                                <div class="weather__rain weather__rain"></div>
-                                <div class="weather__rain weather__rain--1 weather__rain--short"></div>
-                                <div class="weather__rain weather__rain--2 weather__rain--long"></div>
-                                <div class="weather__rain weather__rain--3"></div>
-                                <div class="weather__rain weather__rain--4 weather__rain--long"></div>
-                                <div class="weather__rain weather__rain--5"></div>
-                                <div class="weather__rain weather__rain--6"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--7"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--8"></div>
-                                <div class="weather__rain weather__rain--9"></div>
-                                <div class="weather__rain weather__rain--10 weather__rain--short"></div>
-                                <div class="weather__rain weather__rain--11"></div>
-                                <div class="weather__rain weather__rain--12 weather__rain--long"></div>
-                                <div class="weather__rain weather__rain--13"></div>
-                                <div class="weather__rain weather__rain--short weather__rain--14"></div>
-                                <div class="weather__rain weather__rain--15 weather__rain--short"></div>
-                                <div class="weather__rain weather__rain--16"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--17"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--18"></div>
-                                <div class="weather__rain weather__rain--short weather__rain--19"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--20"></div>
-                                <div class="weather__rain weather__rain--21"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--22"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--23"></div>
-                                <div class="weather__rain weather__rain--short weather__rain--24"></div>
-                                <div class="weather__rain weather__rain--25"></div>
-                                <div class="weather__rain weather__rain--long weather__rain--26"></div>
-                                <div class="weather__rain weather__rain--27"></div>
+                                <div class="weather__rain-container">
+                                    <div class="weather__lightning-flash" style="display: none;"></div>
+                                    <div class="weather__rain" style="display: none;"></div>
+                                </div>
+                              
+
                               </div>
                               <div class="landmark landmark--merlion"></div>
                               <div class="landmark">
@@ -136,11 +114,12 @@
                               </div>
                             </div>
                             <div class="card__content">
-                                <br><span class="card__content__city"></span><br>
+                              <br><span class="card__content__city"></span><br>
                               <span class="card__content__details"><span class="details__day"></span><span class="details__date"></span><span class="details__time"></span></span>
                               <div class="card__temp-wrapper"><span class="card__temp" id="min-temp"></span><span class="card__temp card__temp--current"></span><span class="card__temp" id="max-temp"></span></div>
                             </div>
                           </div>
+                          
                     </div>
                    <div class=" weather__gap">
                     <div class="weather2 day2">
@@ -194,6 +173,23 @@
                             </div>
                         </div>
                     </div>
+                    <div class="weather2 day5">
+                        <div class="weather-card-min">
+                            <div class="weather-card-min__info">
+                                <span class="weather-card-min__info__condition">Very Sunny</span>
+                                <br>
+                                <span class="weather-card-min__info__date2">Jan 17</span>
+                            </div>
+                            <div class="weather-card-min-other">
+                                <div class="weather-card-min__icon"></div>
+                                <div>
+                                    <span class="weather-card-min__info__date1">+4 Day</span>
+                                <br>
+                                <span class="weather-card-min__weather__temp">18° C</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                    </div>
                    </div>
                   
@@ -232,16 +228,43 @@
                     </div>
                     
                 </section>
+                <h1 class="header-title"> Charts ⬇</h1>
                 <section class="predictive-analysis">
                     <!-- Predictive analysis chart -->
                     <div class="chart chart1"></div>
                     <div class="chart chart2"></div>
                 </section>
+                <h1 class="header-title"> Real Time Data ⬇</h1>
                 <section class="data-show">
                     <!-- Predictive analysis chart -->
-                    <div class="data"></div>
-                    <div class="data"></div>
-                    <div class="data"></div>
+                    <div class="data">
+                        <div class="weather__card">
+                            <i class="fa-solid fa-temperature-high"></i>
+                            <div>
+                                <span>Temperature :</span>
+                                <span class="real-time-temp">99&#176 C</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data">
+                        <div class="weather__card">
+                            <i class="fa-solid fa-plant-wilt"></i>
+                            <div>
+                                <span>Soil Moisture :</span>
+                                <span class="real__soil">18&#176</span>
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="data">
+                        <div class="weather__card">
+                <i class="fa-solid fa-car-battery"></i>
+                <div>
+                    <span>Battery Level :</span>
+                    <span class="battery_charging">18&#176</span>
+                    <span class="battery__level">18&#176</span>
+                </div>
+            </div>
+                    </div>
                 </section>
             </div>
             
@@ -251,9 +274,45 @@
                 <p>Please rotate your device to view this website properly.</p>
             </div>
             
-
             <script src="./weathercard.js"></script>
-            <script src="./hometest.js"></script>   
+            <script src="./hometest.js"></script>  
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    fetch('./getdata.php')
+                      .then(response => {
+                        if (!response.ok) {
+                          throw new Error('Network response was not ok ' + response.statusText);
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        console.log('Data received:', data);
+        
+                        // Update HTML elements with data
+                        document.querySelector('.real-time-temp').textContent = data.temperature + '°C';
+                        document.querySelector('.real__soil').textContent = data.soil_moisture + ' %';
+                        document.querySelector('.battery__level').textContent = data.battery_percentage + ' %';
+                        document.querySelector('.battery_charging').textContent = data.battery_status;
+                        // Assuming you have other elements to update, for example:
+                        
+                        
+                        // Formatting the date
+                        var createdDate = new Date(data.created_date);
+                        var weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                        var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+                        var formattedDate = weekdays[createdDate.getDay()] + ', ' +
+                                            months[createdDate.getMonth()] + ' ' +
+                                            createdDate.getDate() + ', ' +
+                                            createdDate.getFullYear() + ' at ' +
+                                            ('0' + createdDate.getHours()).slice(-2) + ':' +
+                                            ('0' + createdDate.getMinutes()).slice(-2);
+                        document.querySelector('.real-time').textContent = formattedDate;
+                      })
+                      .catch(error => {
+                        console.error('Error fetching data:', error);
+                      });
+                });
+            </script> 
             <script>
                 // Function to display or hide the warning message
                 function toggleRotateWarning() {

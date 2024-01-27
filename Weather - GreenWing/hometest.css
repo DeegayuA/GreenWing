@@ -418,6 +418,11 @@ body {
 
 .chart2 {
   flex: 2; /* Take up 2/5 of the available space */
+  display: flex;
+  justify-content: center;
+
+  /* Override the default background color for light mode */
+  /* background-color: #fff !important;  */
 }
 
 /* Data styles */

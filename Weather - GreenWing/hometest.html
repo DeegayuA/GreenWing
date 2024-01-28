@@ -239,9 +239,11 @@
                     <h1 class="header-title"> Charts ⬇</h1>
                     <section class="predictive-analysis">
                         <!-- Predictive analysis chart -->
-                        <div class="chart chart1"></div>
-                        <div class="chart chart2">
+                        <div class="chart chart1">
                             <canvas id="predictive-analysis-chart"></canvas>
+                        </div>
+                        <div class="chart chart2">
+                           
                         </div>
                     </section>
                     <h1 class="header-title"> Real Time Data ⬇</h1>
@@ -411,13 +413,9 @@
                 <script>
                     // Dataset for the chart
                     const data = [
-                        { year: 2010, actual: 10, predicted: 5 },
-                        { year: 2011, actual: 20, predicted: 30 },
-                        { year: 2012, actual: 15, predicted: 28 },
-                        { year: 2013, actual: 25, predicted: 40 },
-                        { year: 2014, actual: 22, predicted: 12 },
-                        { year: 2015, actual: null, predicted: 25 },
-                        { year: 2016, actual: null, predicted: 30 },
+                        { month: 11, actual: 22, predicted: 12 },
+                        { month: 12, actual: 23, predicted: 25 },
+                        { month: 1, actual: null, predicted: 30 },
                     ];
 
                     // Chart configurations
@@ -426,7 +424,7 @@
                             type: 'line',
                             label: [''],
                             data: {
-                                labels: data.map(row => row.year),
+                                labels: data.map(row => row.month),
                                 datasets: [
                                     {
                                         label: 'Actual Data',

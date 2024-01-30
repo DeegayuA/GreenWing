@@ -238,34 +238,47 @@
                     </section>
                     <h1 class="header-title"> Charts ⬇</h1>
                     <section class="predictive-analysis">
-                        <!-- Predictive analysis chart -->
                         <div class="chart chart1">
                             <canvas id="predictive-analysis-chart"></canvas>
                         </div>
                         <div class="chart chart2">
-                           
+                            <h1>It's the perfect day for spraying</h1>
+                            <div class="chart2-container">
+                                <div class="chart2-div">
+                                    <div class="chart2-img"></div>
+                                </div>
+                                <div class="chart2-div">
+                                    <div class="chart2-data">
+                                        <span class="real-time-temp">4,39 °C</span>
+                                        <span class="chart2-description">Real-Time Temperature</span>
+                                      </div>
+                                      <div class="chart2-data">
+                                        <span class="real__soil">pH 7</span>
+                                        <span class="chart2-description">Real-Time Soil Moisture</span>
+                                      </div>
+                                </div>
+                            </div>
                         </div>
                     </section>
                     <h1 class="header-title"> Real Time Data ⬇</h1>
                     <section class="data-show">
-                        <!-- Predictive analysis chart -->
                         <div class="data">
                             <div class="weather__card">
-                                <i class="fa-solid fa-temperature-high"></i>
+                                <i class="fa-solid fa-water"></i>
                                 <div>
-                                    <span>Temperature :</span>
-                                    <span class="real-time-temp">99&#176 C</span>
+                                    <span>Real Time Humidity :</span>
+                                    <span class="real-time-humidity">99.9%</span>
                                 </div>
                             </div>
                         </div>
                         <div class="data">
                             <div class="weather__card">
-                                <i class="fa-solid fa-plant-wilt"></i>
+                                <i class="fa-solid fa-sun-plant-wilt"></i>
                                 <div>
-                                    <span>Soil Moisture :</span>
-                                    <span class="real__soil">18&#176</span>
+                                    <span>Real Time Solar Intensity</span>
+                                    <span class="real__sun">18&#176</span>
                                 </div>
-                            </div>
+                            </div> 
                         </div>
                         <div class="data">
                             <div class="weather__card">
@@ -303,8 +316,10 @@
 
                                 // Update HTML elements with data
                                 document.querySelector('.real-time-temp').textContent = data.temperature + '°C';
+                                document.querySelector('.real-time-humidity').textContent = data.humidity + '%';
                                 document.querySelector('.real__soil').textContent = data.soil_moisture + ' %';
                                 document.querySelector('.battery__level').textContent = data.battery_percentage + ' %';
+                                document.querySelector('.real__sun').textContent = data.light_intensity+ ' %';
                                 document.querySelector('.battery_charging').textContent = data.battery_status;
                                 // Assuming you have other elements to update, for example:
 
@@ -404,8 +419,6 @@
                         }
                     };
                 </script>
-
-                <!-- Chart.js scripts -->
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
                     integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
                     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -438,6 +451,14 @@
                             },
                             options: {
                                 responsive: true,
+                                animations: {
+                                    tension: {
+                                      duration: 300,
+                                      easing: 'linear',
+                                      from: 1,
+                                      to: 0,
+                                    }
+                                    },
                                 plugins: {
                                     legend: {
                                         position: 'bottom',
@@ -472,7 +493,7 @@
                     // Chart.defaults.color = "#000";
 
                     Chart.defaults.color = "#fff";
-                </script>
+                    </script>
             </div>
         </div>
     </div>

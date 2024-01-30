@@ -20,7 +20,7 @@
 
   /* Font sizing */
   --font-size-regular: 1rem; /* Base font size for regular text */
-  --font-size-large: 1.125rem; /* Larger font size for headings */
+  --font-size-large: 1.2rem; /* Larger font size for headings */
 }
 
 /* Dark Mode Styles */
@@ -417,11 +417,48 @@ body {
 
 .chart2 {
   flex: 2; /* Take up 2/5 of the available space */
-  display: flex;
-  justify-content: center;
-  height: 250px;
+  height: max-content;
   min-width: 300px;
+  color: var(--dark-text-color);
+  padding: var(--primary-spacing);
 }
+.chart2-container{
+  display: flex;
+  flex-direction: row;
+  text-align: left;
+}
+.chart2 h1 {
+  font-size: var(--font-size-large);
+  margin: 0;
+  text-align: left;
+  margin-bottom: var(--primary-spacing);
+}
+.chart2-data {
+  font-size: var(--font-size-regular);
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--primary-spacing);
+  margin-left: var(--primary-spacing);
+}
+.chart2-data span:nth-child(1){
+  font-weight: 700;
+  text-wrap: nowrap;
+}
+
+
+.chart2-img {
+  width: 120px;
+  aspect-ratio: 1;
+  background-image: url('plant-dark.png');
+  background-size: cover;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chart2-img  {
+    background-image: url('plant-white.png');
+  }
+}
+
 
 /* Data styles */
 .data {
@@ -581,7 +618,9 @@ body {
     margin-left: 0;
     margin-top: var(--primary-spacing);
   }
-
+  .chart2 h1 {
+    margin-bottom: var(--primary-spacing);
+  }
 }
 @media screen and (max-width: 767px) {
     .header-title{

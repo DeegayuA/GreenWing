@@ -249,12 +249,14 @@
                                 </div>
                                 <div class="chart2-div">
                                     <div class="chart2-data">
-                                        <span class="real-time-temp">4,39 °C</span>
                                         <span class="chart2-description">Real-Time Temperature</span>
+                                        <span class="real-time-temp">4,39 °C</span>
+                                        
                                       </div>
                                       <div class="chart2-data">
-                                        <span class="real__soil">pH 7</span>
                                         <span class="chart2-description">Real-Time Soil Moisture</span>
+                                        <span class="real__soil">pH 7</span>
+                                        
                                       </div>
                                 </div>
                             </div>
@@ -439,6 +441,9 @@
                         chart.options.scales.x.grid.color = gridColor;
                         chart.options.scales.y.grid.color = gridColor;
                         chart.options.plugins.title.color = textColor;
+                        chart.options.plugins.legend.labels.color = textColor;  
+                        chart.options.scales.x.title.color = textColor;
+                        chart.options.scales.y.title.color = textColor;
                         chart.update();
                     }
                 

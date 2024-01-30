@@ -442,11 +442,13 @@
                         chart.update();
                     }
                 
-                    // Function to generate dates from -10 days to +10 days
+                    // Function to generate dates based on the device type
                     function generateDateRange() {
                         const today = new Date();
                         const dates = [];
-                        for (let i = -10; i <= 10; i++) { // Predicted data from -10 days to +10 days
+                        const isMobile = window.innerWidth <= 767; // Define mobile width threshold
+                        const dateCount = isMobile ? 4 : 10; // Set date count based on device type
+                        for (let i = -dateCount; i <= dateCount; i++) {
                             let date = new Date();
                             date.setDate(today.getDate() + i);
                             dates.push(date);
@@ -465,14 +467,25 @@
                         }
                     }
                 
-                    // Generate data for the chart
-                    const today = new Date();
-                    const dateRange = generateDateRange();
-                    const data = dateRange.map(date => ({
-                        date: formatDate(date),
-                        predictedGrowth: Math.random() * 100, // Example predicted growth
-                        actualGrowth: date <= today ? Math.random() * 100 : null // Actual growth only until today
-                    }));
+                   // Generate data for the chart
+const today = new Date();
+const dateRange = generateDateRange();
+let previousPredictedGrowth = Math.random() * 100;
+let previousActualGrowth = Math.random() * 100;
+
+const data = dateRange.map(date => {
+    const predictedGrowth = previousPredictedGrowth + Math.random() * 10; // Adjust the growth range as needed
+    const actualGrowth = date <= today ? previousActualGrowth + Math.random() * 10 : null; // Adjust the growth range as needed
+    previousPredictedGrowth = predictedGrowth;
+    previousActualGrowth = actualGrowth;
+
+    return {
+        date: formatDate(date),
+        predictedGrowth: predictedGrowth,
+        actualGrowth: actualGrowth
+    };
+});
+
                 
                     // Chart configurations
                     const chart = new Chart(document.getElementById('predictive-analysis-chart'), {
@@ -535,6 +548,7 @@
                         updateChartColors(chart);
                     });
                 </script>
+                
                 
         
             </div>

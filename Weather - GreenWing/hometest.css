@@ -448,7 +448,7 @@ body {
 
 
 .chart2-img {
-  width: 120px;
+  width: 10vw;
   aspect-ratio: 1;
   background-image: url('plant-dark.png');
   background-size: cover;
@@ -593,6 +593,9 @@ body {
     max-height: max-content;
     text-align: center;
   }
+  .chart2-img {
+    width: 20vw;
+  }
   .weather-forecast {
     width: 100%;
     align-items: center;
@@ -621,6 +624,9 @@ body {
   .weather__gap{
     margin-left: 0;
     margin-top: var(--primary-spacing);
+  }
+  .chart{
+    flex-direction: column-reverse;
   }
   .chart2 h1 {
     margin-bottom: var(--primary-spacing);
@@ -656,6 +662,12 @@ body {
   .weather__div{
     margin-top: var(--primary-spacing);
     margin-left: 0;
+    flex-direction: column;
+  }
+  .chart2-img {
+    width: 30vw;
+  }
+  .data-show{
     flex-direction: column;
   }
 }

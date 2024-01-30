@@ -407,18 +407,19 @@ body {
 }
 
 /* Chart styles */
-.chart {
-  height: max-content;
+.predictive-analysis{
+   flex-wrap: nowrap;
 }
-
 .chart1 {
-  flex: 3; /* Take up 3/5 of the available space */
+  flex: 2; 
+}
+.chartjs-render-monitor .todayLabel {
+  font-weight: bold;
 }
 
 .chart2 {
-  flex: 2; /* Take up 2/5 of the available space */
+  flex: 1;
   height: max-content;
-  min-width: 300px;
   color: var(--dark-text-color);
   padding: var(--primary-spacing);
 }
@@ -497,6 +498,9 @@ body {
     .plus{
         display: none;
     }
+    .predictive-analysis{
+      flex-wrap: wrap;
+   }
 }
 @media screen and (max-width: 1279px) {
   .body {

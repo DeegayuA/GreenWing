@@ -237,11 +237,11 @@
 
                     </section>
                     <h1 class="header-title"> Charts ⬇</h1>
-                    <section class="predictive-analysis">
-                        <div class="chart chart1">
+                    <section class="chart predictive-analysis">
+                        <div class="chart1">
                             <canvas id="predictive-analysis-chart"></canvas>
                         </div>
-                        <div class="chart chart2">
+                        <div class="chart2">
                             <h1>It's the perfect day for spraying</h1>
                             <div class="chart2-container">
                                 <div class="chart2-div">
@@ -275,7 +275,7 @@
                             <div class="weather__card">
                                 <i class="fa-solid fa-sun-plant-wilt"></i>
                                 <div>
-                                    <span>Real Time Solar Intensity</span>
+                                    <span>Real Time Solar Intensity :</span>
                                     <span class="real__sun">18&#176</span>
                                 </div>
                             </div> 
@@ -420,80 +420,123 @@
                     };
                 </script>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
-                    integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
-                    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
+                integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
+                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        
                 <script>
-                    // Dataset for the chart
-                    const data = [
-                        { month: 11, actual: 22, predicted: 12 },
-                        { month: 12, actual: 23, predicted: 25 },
-                        { month: 1, actual: null, predicted: 30 },
-                    ];
-
+                    // Function to determine if the dark mode is active
+                    function isDarkMode() {
+                        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    }
+                
+                    // Function to update chart colors based on the theme
+                    function updateChartColors(chart) {
+                        const darkMode = isDarkMode();
+                        const textColor = darkMode ? '#ddd' : '#333';
+                        const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+                        chart.options.scales.x.ticks.color = textColor;
+                        chart.options.scales.y.ticks.color = textColor;
+                        chart.options.scales.x.grid.color = gridColor;
+                        chart.options.scales.y.grid.color = gridColor;
+                        chart.options.plugins.title.color = textColor;
+                        chart.update();
+                    }
+                
+                    // Function to generate dates from -10 days to +10 days
+                    function generateDateRange() {
+                        const today = new Date();
+                        const dates = [];
+                        for (let i = -10; i <= 10; i++) { // Predicted data from -10 days to +10 days
+                            let date = new Date();
+                            date.setDate(today.getDate() + i);
+                            dates.push(date);
+                        }
+                        return dates;
+                    }
+                
+                    // Formatting date for display (e.g., "Jan 01" or "Today")
+                    function formatDate(date) {
+                        const today = new Date();
+                        const options = { month: 'short', day: 'numeric' };
+                        if (date.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0)) {
+                            return `Today`; // Make today's date bold
+                        } else {
+                            return date.toLocaleDateString('en-US', options);
+                        }
+                    }
+                
+                    // Generate data for the chart
+                    const today = new Date();
+                    const dateRange = generateDateRange();
+                    const data = dateRange.map(date => ({
+                        date: formatDate(date),
+                        predictedGrowth: Math.random() * 100, // Example predicted growth
+                        actualGrowth: date <= today ? Math.random() * 100 : null // Actual growth only until today
+                    }));
+                
                     // Chart configurations
-                    new Chart(document.getElementById('predictive-analysis-chart'),
-                        {
-                            type: 'line',
-                            label: [''],
-                            data: {
-                                labels: data.map(row => row.month),
-                                datasets: [
-                                    {
-                                        label: 'Actual Data',
-                                        data: data.map(row => row.actual)
-                                    },
-                                    {
-                                        label: 'Predicted Data',
-                                        data: data.map(row => row.predicted),
-                                    }
-                                ]
+                    const chart = new Chart(document.getElementById('predictive-analysis-chart'), {
+                        type: 'line',
+                        data: {
+                            labels: data.map(row => row.date),
+                            datasets: [
+                                {
+                                    label: 'Predicted Growth',
+                                    data: data.map(row => row.predictedGrowth),
+                                    borderColor: '#47815d', // Hex color for predicted growth
+                                    borderDash: [5, 5], // Make predicted data a dash line
+                                    tension: 0.1
+                                },
+                                {
+                                    label: 'Actual Growth',
+                                    data: data.map(row => row.actualGrowth),
+                                    borderColor: '#8cfe99', // Hex color for actual growth
+                                    tension: 0.1
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Growth Analysis Over Days'
+                                },
                             },
-                            options: {
-                                responsive: true,
-                                animations: {
-                                    tension: {
-                                      duration: 300,
-                                      easing: 'linear',
-                                      from: 1,
-                                      to: 0,
-                                    }
-                                    },
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom',
-                                    },
+                            scales: {
+                                x: {
                                     title: {
                                         display: true,
-                                        text: 'Predictive Analysis'
+                                        text: 'Date'
                                     },
-                                    colors: {
-                                        enabled: true
-                                    },
+                                    grid: {},
+                                    ticks: {}
                                 },
-                                scales: {
-                                    x: {
-                                        grid: {
-                                            color: "rgba(255, 255, 255, 0.1)"
-                                        },
-                                        ticks: { color: '#fff'}
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Growth (cm)'
                                     },
-                                    y: {
-                                        grid: {
-                                            color: "rgba(255, 255, 255, 0.1)"
-                                        },
-                                        ticks: { color: '#fff'}
-                                    }
-                                },
+                                    grid: {},
+                                    ticks: {}
+                                }
                             },
-
-                        });
-
-                    // For ligth mode set the color to #000
-                    // Chart.defaults.color = "#000";
-
-                    Chart.defaults.color = "#fff";
-                    </script>
+                        },
+                    });
+                
+                    // Initial color update
+                    updateChartColors(chart);
+                
+                    // Listen for changes in color scheme
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                        updateChartColors(chart);
+                    });
+                </script>
+                
+        
             </div>
         </div>
     </div>

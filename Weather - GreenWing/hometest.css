@@ -464,11 +464,12 @@ body {
 /* Data styles */
 .data {
   height: max-content;
-  flex: 4;
+  flex: 3;
 }
 /* Weather styles */
 .weather2 {
-  flex: 1;
+  flex: 2;
+  width: max-content;
   width: inherit;
   padding-bottom: var(--primary-spacing);
 }

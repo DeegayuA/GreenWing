@@ -42,18 +42,12 @@
                     <button id="sidebarToggle">&#9776;</button>
                 </div>
                 <div class="company-name">
-                    <select>
-                        <option value="exotic_inc">Test Company</option>
-                        <option value="exotic_inc">Test Company2</option>
-                        <option value="exotic_inc">Test Company3</option>
-
-                    </select>
-                </div>
-                <div class="company-name2">
-                    <select>
-                        <option value="exotic_inc">↓ </option>
-                        <option value="exotic_inc">Test Company2</option>
-                        <option value="exotic_inc">Test Company3</option>
+                    <select id="location-selector">
+                        <option value="Default">↓ </option>
+                        <!-- <option value="Chilly">Chilly</option> -->
+                        <option value="Ground Nut">Ground Nut</option>
+                        <option value="Mukunuwenna">Mukunuwenna</option>
+                        <option value="Default">+</option>
 
                     </select>
                 </div>
@@ -251,13 +245,13 @@
                                     <div class="chart2-data">
                                         <span class="chart2-description">Real-Time Temperature</span>
                                         <span class="real-time-temp">4,39 °C</span>
-                                        
-                                      </div>
-                                      <div class="chart2-data">
+
+                                    </div>
+                                    <div class="chart2-data">
                                         <span class="chart2-description">Real-Time Soil Moisture</span>
                                         <span class="real__soil">pH 7</span>
-                                        
-                                      </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +274,7 @@
                                     <span>Real Time Solar Intensity :</span>
                                     <span class="real__sun">18&#176</span>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
                         <div class="data">
                             <div class="weather__card">
@@ -302,8 +296,48 @@
                     <p>Please rotate your device to view this website properly.</p>
                 </div>
 
+
+
                 <script src="./weathercard.js"></script>
                 <script src="./hometest.js"></script>
+                <script>
+                    function updateSelectOptions() {
+                        const locationSelector = document.getElementById("location-selector");
+                        const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
+                
+                        if (isMobile) {
+                            // Update the first option for mobile view
+                            locationSelector.options[0].value = "Default";
+                            locationSelector.options[0].text = "↓";
+                        } else {
+                            // Reset the first option for desktop view
+                            locationSelector.options[0].value = "Chilly";
+                            locationSelector.options[0].text = "Chilly";
+                        }
+                    }
+                
+                    function updateClassName() {
+                        const companyDiv = document.querySelector(".company-name");
+                        const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
+                
+                        if (isMobile) {
+                            companyDiv.className = "company-name2";
+                        } else {
+                            companyDiv.className = "company-name";
+                        }
+                    }
+                
+                    // Initial call to set the select options and class name based on window width
+                    updateSelectOptions();
+                    updateClassName();
+                
+                    // Add an event listener to adjust the select options and class name when the window is resized
+                    window.addEventListener("resize", function() {
+                        updateSelectOptions();
+                        updateClassName();
+                    });
+                </script>
+                
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
                         fetch('./getdata.php')
@@ -321,7 +355,7 @@
                                 document.querySelector('.real-time-humidity').textContent = data.humidity + '%';
                                 document.querySelector('.real__soil').textContent = data.soil_moisture + ' %';
                                 document.querySelector('.battery__level').textContent = data.battery_percentage + ' %';
-                                document.querySelector('.real__sun').textContent = data.light_intensity+ ' %';
+                                document.querySelector('.real__sun').textContent = data.light_intensity + ' %';
                                 document.querySelector('.battery_charging').textContent = data.battery_status;
                                 // Assuming you have other elements to update, for example:
 
@@ -422,140 +456,149 @@
                     };
                 </script>
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
-                integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
-                crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        
-                <script>
-                    // Function to determine if the dark mode is active
-                    function isDarkMode() {
-                        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                    }
-                
-                    // Function to update chart colors based on the theme
-                    function updateChartColors(chart) {
-                        const darkMode = isDarkMode();
-                        const textColor = darkMode ? '#ddd' : '#333';
-                        const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
-                        chart.options.scales.x.ticks.color = textColor;
-                        chart.options.scales.y.ticks.color = textColor;
-                        chart.options.scales.x.grid.color = gridColor;
-                        chart.options.scales.y.grid.color = gridColor;
-                        chart.options.plugins.title.color = textColor;
-                        chart.options.plugins.legend.labels.color = textColor;  
-                        chart.options.scales.x.title.color = textColor;
-                        chart.options.scales.y.title.color = textColor;
-                        chart.update();
-                    }
-                
-                    // Function to generate dates based on the device type
-                    function generateDateRange() {
-                        const today = new Date();
-                        const dates = [];
-                        const isMobile = window.innerWidth <= 767; // Define mobile width threshold
-                        const dateCount = isMobile ? 4 : 10; // Set date count based on device type
-                        for (let i = -dateCount; i <= dateCount; i++) {
-                            let date = new Date();
-                            date.setDate(today.getDate() + i);
-                            dates.push(date);
+                    integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
+                    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+                    <script>
+                        // Function to determine if the dark mode is active
+                        function isDarkMode() {
+                            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                         }
-                        return dates;
-                    }
-                
-                    // Formatting date for display (e.g., "Jan 01" or "Today")
-                    function formatDate(date) {
-                        const today = new Date();
-                        const options = { month: 'short', day: 'numeric' };
-                        if (date.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0)) {
-                            return `Today`; // Make today's date bold
-                        } else {
-                            return date.toLocaleDateString('en-US', options);
+                    
+                        // Function to update chart colors based on the theme
+                        function updateChartColors(chart) {
+                            const darkMode = isDarkMode();
+                            const textColor = darkMode ? '#ddd' : '#333';
+                            const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+                            const scales = ['x', 'y'];
+                    
+                            scales.forEach(scale => {
+                                chart.options.scales[scale].ticks.color = textColor;
+                                chart.options.scales[scale].grid.color = gridColor;
+                                chart.options.scales[scale].title.color = textColor;
+                            });
+                    
+                            chart.options.plugins.title.color = textColor;
+                            chart.options.plugins.legend.labels.color = textColor;
+                            chart.update();
                         }
-                    }
-                
-                   // Generate data for the chart
-const today = new Date();
-const dateRange = generateDateRange();
-let previousPredictedGrowth = Math.random() * 100;
-let previousActualGrowth = Math.random() * 100;
-
-const data = dateRange.map(date => {
-    const predictedGrowth = previousPredictedGrowth + Math.random() * 10; // Adjust the growth range as needed
-    const actualGrowth = date <= today ? previousActualGrowth + Math.random() * 10 : null; // Adjust the growth range as needed
-    previousPredictedGrowth = predictedGrowth;
-    previousActualGrowth = actualGrowth;
-
-    return {
-        date: formatDate(date),
-        predictedGrowth: predictedGrowth,
-        actualGrowth: actualGrowth
-    };
-});
-
-                
-                    // Chart configurations
-                    const chart = new Chart(document.getElementById('predictive-analysis-chart'), {
-                        type: 'line',
-                        data: {
-                            labels: data.map(row => row.date),
-                            datasets: [
-                                {
-                                    label: 'Predicted Growth',
-                                    data: data.map(row => row.predictedGrowth),
-                                    borderColor: '#47815d', // Hex color for predicted growth
-                                    borderDash: [5, 5], // Make predicted data a dash line
-                                    tension: 0.1
+                    
+                        // Function to generate dates based on the device type
+                        function generateDateRange() {
+                            const today = new Date();
+                            const dates = [];
+                            const isMobile = window.innerWidth <= 767; // Define mobile width threshold
+                            const dateCount = isMobile ? 4 : 10; // Set date count based on device type
+                            for (let i = -dateCount; i <= dateCount; i++) {
+                                let date = new Date();
+                                date.setDate(today.getDate() + i);
+                                dates.push(date);
+                            }
+                            return dates;
+                        }
+                    
+                        // Formatting date for display (e.g., "Jan 01" or "Today")
+                        function formatDate(date) {
+                            const today = new Date();
+                            const options = { month: 'short', day: 'numeric' };
+                            return date.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0) ? `Today` : date.toLocaleDateString('en-US', options);
+                        }
+                    
+                        // Generate data for the chart
+                        const dateRange = generateDateRange();
+                        const today = new Date();
+                        let previousPredictedGrowth = Math.random() * 100;
+                        let previousActualGrowth = Math.random() * 100;
+                    
+                        const data = dateRange.map(date => {
+                            const predictedGrowth = previousPredictedGrowth + Math.random() * 10;
+                            const actualGrowth = date <= today ? previousActualGrowth + Math.random() * 10 : null;
+                            previousPredictedGrowth = predictedGrowth;
+                            previousActualGrowth = actualGrowth;
+                    
+                            return {
+                                date: formatDate(date),
+                                predictedGrowth: predictedGrowth,
+                                actualGrowth: actualGrowth
+                            };
+                        });
+                    
+                        // Function to generate new data based on the selected option
+                        function getDataForOption(option) {
+                            return dateRange.map(date => {
+                                const predictedGrowth = Math.random() * 100;
+                                const actualGrowth = date <= today ? Math.random() * 100 : null;
+                                return {
+                                    date: formatDate(date),
+                                    predictedGrowth: predictedGrowth,
+                                    actualGrowth: actualGrowth
+                                };
+                            });
+                        }
+                    
+                        // Function to create a new chart or update the existing chart
+                        let chart = null;
+                        function createOrUpdateChart(newData) {
+                            const ctx = document.getElementById('predictive-analysis-chart').getContext('2d');
+                            chart = chart || new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: [],
+                                    datasets: [
+                                        {
+                                            label: 'Predicted Growth',
+                                            data: [],
+                                            borderColor: '#47815d',
+                                            borderDash: [5, 5],
+                                            tension: 0.1
+                                        },
+                                        {
+                                            label: 'Actual Growth',
+                                            data: [],
+                                            borderColor: '#8cfe99',
+                                            tension: 0.1
+                                        }
+                                    ]
                                 },
-                                {
-                                    label: 'Actual Growth',
-                                    data: data.map(row => row.actualGrowth),
-                                    borderColor: '#8cfe99', // Hex color for actual growth
-                                    tension: 0.1
-                                }
-                            ]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Growth Analysis Over Days'
-                                },
-                            },
-                            scales: {
-                                x: {
-                                    title: {
-                                        display: true,
-                                        text: 'Date'
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        legend: { position: 'bottom' },
+                                        title: { display: true, text: 'Growth Analysis Over Days' },
                                     },
-                                    grid: {},
-                                    ticks: {}
-                                },
-                                y: {
-                                    title: {
-                                        display: true,
-                                        text: 'Growth (cm)'
+                                    scales: {
+                                        x: { title: { display: true, text: 'Date' }, grid: {}, ticks: {} },
+                                        y: { title: { display: true, text: 'Growth (cm)' }, grid: {}, ticks: {} }
                                     },
-                                    grid: {},
-                                    ticks: {}
                                 }
-                            },
-                        },
-                    });
-                
-                    // Initial color update
-                    updateChartColors(chart);
-                
-                    // Listen for changes in color scheme
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                        updateChartColors(chart);
-                    });
-                </script>
-                
-                
-        
+                            });
+                    
+                            chart.data.labels = newData.map(row => row.date);
+                            chart.data.datasets[0].data = newData.map(row => row.predictedGrowth);
+                            chart.data.datasets[1].data = newData.map(row => row.actualGrowth);
+                            chart.update();
+                        }
+                    
+                        // Function to update the chart based on the selected option
+                        function updateChart() {
+                            const selectedOption = document.getElementById("location-selector").value;
+                            const newData = getDataForOption(selectedOption);
+                            createOrUpdateChart(newData);
+                        }
+                    
+                        // Add an event listener to the <select> element to detect changes
+                        document.getElementById("location-selector").addEventListener("change", updateChart);
+                    
+                        // Initialize chart with default data
+                        createOrUpdateChart(data);
+                    
+                        // Listen for changes in color scheme
+                        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                            updateChartColors(chart);
+                        });
+                    </script>
+                    
+
             </div>
         </div>
     </div>

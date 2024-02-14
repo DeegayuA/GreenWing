@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drone Control</title>
+</head>
+<body>
+    <div>
+        <button onclick="sendCommand('takeoff')">Take Off</button>
+        <button onclick="sendCommand('land')">Land</button>
+    </div>
+    <img src="http://127.0.0.1:5000/video_feed" alt="Video Feed">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        var socket = io.connect('http://127.0.0.1:5000/');
+
+        function sendCommand(command) {
+            console.log('Sending:', command);
+            socket.emit('command', command);
+        }
+    </script>
+</body>
+</html>

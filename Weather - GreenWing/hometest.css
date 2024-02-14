@@ -123,13 +123,15 @@ body {
 }
 
 /* Logout Link Styles */
-.logout a {
+.logout {
+  width: 100%;
   padding: var(--primary-spacing) 1rem;
+  position: relative;
+  left: calc(var(--primary-spacing) * 1.2);
+}
+.logout a {
   text-decoration: none;
   color: var(--sidebar-text-color);
-  position: absolute;
-  bottom: var(--primary-spacing);
-  left: calc(var(--primary-spacing) * 2);
 }
 
 #container {
@@ -321,7 +323,7 @@ body {
 .predictive-analysis,
 .data-show {
   display: flex;
-  gap: var(--primary-spacing);
+  gap: calc(var(--primary-spacing) / 2);
   flex-wrap: wrap; /* Allow wrapping for smaller screens */
 }
 
@@ -631,6 +633,9 @@ body {
   }
   .chart2 h1 {
     margin-bottom: var(--primary-spacing);
+  }
+  .data-show{
+    gap: calc(var(--primary-spacing) / 1);
   }
 }
 @media screen and (max-width: 767px) {

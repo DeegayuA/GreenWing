@@ -1,6 +1,12 @@
 <?php
-require 'config.php';
-// print_r($_POST);
+
+require 'config.php'; // Includes database connection settings
+
+// Temporary error reporting for debugging (remove in production)
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 // Create connection
 $conn = new mysqli(DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME);
 
@@ -14,27 +20,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $conn->real_escape_string($_POST['email']);
     $password = $conn->real_escape_string($_POST['password']);
 
-    // Hash the password
+    // Hash the password using PHP's recommended method
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-    // Prepare and bind
-    $stmt = $conn->prepare("INSERT INTO tbl_users (username, email, password) VALUES (?, ?, ?)");
-    $stmt->bind_param("sss", $username, $email, $passwordHash);
-      
-    
+    // File upload configuration
+    $targetDir = "uploads/"; 
+    $allowTypes = array('jpg', 'png', 'jpeg', 'gif'); 
 
-    // Execute and check if successful
-    if ($stmt->execute()) {
-        echo "New record created successfully";
-    } else {
-        echo "Error: " . $stmt->error;
+    // Handle file upload if a file is present
+    if (!empty($_FILES["profile_picture"]["name"])) { 
+      $fileName = basename($_FILES["profile_picture"]["name"]);
+      $fileNameParts = explode(".", $fileName); // Separate name and extension
+      $newFileName = $fileNameParts[0] . "_" . time() . "." . $fileNameParts[1]; 
+      $targetFilePath = $targetDir . $newFileName;
+        $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+
+        // Ensure file type is allowed
+        if (in_array($fileType, $allowTypes)) {
+            // Attempt to move the uploaded file (permissions crucial here)
+            if (move_uploaded_file($_FILES["profile_picture"]["tmp_name"], $targetFilePath)) {
+                // File uploaded successfully!
+                header('Location: ./login.html');
+                exit;
+            } else {
+                echo "Error uploading file. Check your PHP configuration and the permissions of the 'uploads/' folder.";
+                exit; // Stop further execution if file upload fails
+            }
+        } else {
+            echo 'Invalid file format. Please upload a JPG, JPEG, PNG, or GIF file.';
+            exit; // Stop further execution if invalid file type
+        }
     }
 
-    $stmt->close();
-}
+    // Prepare SQL query (use a prepared statement for security)
+    $stmt = $conn->prepare("INSERT INTO tbl_users (username, email, password, profile_picture) VALUES (?, ?, ?, ?)");
 
-$conn->close();
+    // Bind parameters (IMPORTANT for preventing SQL injection)
+    $stmt->bind_param("ssss", $username, $email, $passwordHash, $targetFilePath);
+
+     // Execute statement
+     if ($stmt->execute()) {
+      // Redirect to login page upon success or add a success message here
+      header('Location: login.html');
+      exit;
+  } else {
+      echo "Error: " . $stmt->error; // No need to print raw SQL for security
+  }
+
+    $stmt->close();
+    $conn->close(); 
+};
 ?>
+
+
+
+
 <!DOCTYPE html>
 <html lang="en" >
 <head>

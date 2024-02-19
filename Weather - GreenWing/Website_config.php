@@ -1,4 +1,5 @@
 <?php 
+
 define('DB_HOST'    , 'fdb1033.awardspace.net'); 
 define('DB_USERNAME', '4422103_greenwingdb'); 
 define('DB_PASSWORD', 'GreenWing@123'); 

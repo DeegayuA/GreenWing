@@ -556,7 +556,7 @@ body {
     padding-left: calc(var(--primary-spacing) / 2);
     padding-right: calc(var(--primary-spacing) / 2);
   }
-  .profile-name {
+  .profile-pic {
     display: none; /* Hide profile name on mobile */
   }
   .plus{

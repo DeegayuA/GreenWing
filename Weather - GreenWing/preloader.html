@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>Loading</title>
   <link rel="stylesheet" href="loader.css">
-  <meta http-equiv="refresh" content="3;url=./home.html" />
+  <meta http-equiv="refresh" content="3;url=./hometest.html" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
 
@@ -43,14 +43,52 @@
     <span class="drop"></span>
     <span class="drop"></span>
     <span class="drop"></span>
-    <span class="drop"></span>
+    <span class="drop"></span> 
     <span class="drop"></span>
   </div>
   
-  <div class="text">
-    LOOKING AROUND, WAIT A SEC <br> <div class="greenwing">GREENWING</div>
-  </div>
+  <div class="text" id="main_text">LOOKING AROUND, WAIT A SEC</div>
+  <div class="text greenwing">GREENWING</div>
 </div>
+<!-- <script>
+  const headers = new Headers();
+headers.append('Content-Type', 'application/json');
 
+  fetch('./login.php',{
+    method: 'POST',
+  headers: headers 
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+      }
+      return response.json();
+  })
+  .then(idData => {
+      console.log(idData);
+      if (!idData.success) {
+          // If login is successful, display the success message and redirect after a delay
+          document.getElementById('main_text').innerText = idData.message;
+          var delayInMilliseconds = 2000; // Adjust the delay as needed
+  
+          setTimeout(function() {
+              window.location.href = 'hometest.html';
+          }, delayInMilliseconds);
+      } else {
+          // If login fails, display the failure message and redirect after a delay
+          document.getElementById('main_text').innerText = idData.message;
+          var delayInMilliseconds = 2000; // Adjust the delay as needed
+  
+          setTimeout(function() {
+              window.location.href = 'login.html'; // Redirect to login page
+          }, delayInMilliseconds);
+          console.error('Login failed:', idData.message);
+      }
+  })
+  .catch(error => {
+      console.error('Error fetching ID:', error);
+  });
+  </script> -->
+  
 </body>
 </html>

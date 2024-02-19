@@ -1,8 +1,10 @@
 <?php
-
 require 'config.php';
 
-$sql = "SELECT * FROM tbl_data WHERE 1 ORDER BY id DESC";
+// Retrieve the 'id' parameter from the GET request
+$id = $_GET['id'];
+
+$sql = "SELECT username, profile_picture FROM tbl_users WHERE id = $id";
 $result = $db->query($sql);
 if (!$result) {
   { echo "Error: " . $sql . "<br>" . $db->error; }
@@ -14,11 +16,5 @@ $rows = $result -> fetch_all(MYSQLI_ASSOC);
 // print_r($row);
 
 header('Content-Type: application/json');
- 
-$table=array(0=>array('Label','Value'),1=>array('Temperature',$row));
-
-
 echo json_encode($row);
-
-
 ?>

@@ -40,22 +40,48 @@
         <input type="file" id="profile_picture" name="profile_picture" accept="image/*" required>
       </div>
       <br>
+      <div class="profile-picture-preview">
+        <label for="profile_picture" style="display:none;">Profile Picture Preview:</label>
+        <img id="profilePicturePreview" src="" alt="Profile picture preview" style="display:none; width: 100px; height: 100px;"/> 
+      </div>
+      <br>
       <button type="submit" class="login-button">Sign Up</button>
       <span class="forgot-password">We can't see your password. <a href="https://www.php.net/manual/en/function.password-hash.php">We Use Password Hashing</a></span>
     </form>
   </div>
 </div>
-<script src="./login.js"></script>
 <script>
+  // Listen for changes on the profile picture input
+  document.getElementById('profile_picture').addEventListener('change', function(event) {
+
+   
+
+    if (this.files && this.files[0]) {
+      // Call resizeImage as soon as a file is selected
+      resizeImage(this.files[0]).then(function(blob) {
+        // Create a URL for the blob
+        const url = URL.createObjectURL(blob);
+        // Update the src of the profilePicturePreview image and display it
+        const profilePicturePreview = document.getElementById('profilePicturePreview');
+        const previewDiv = document.querySelector('.profile-picture-preview'); 
+        profilePicturePreview.src = url;
+        profilePicturePreview.style.display = 'block';
+        profilePicturePreview.style.display = 'block'; 
+      }).catch(function(error) {
+        console.error('Resize error:', error);
+      });
+    }
+  });
+
   document.getElementById('RegisterForm').addEventListener('submit', async function(event) {
     event.preventDefault(); // Prevent the form from submitting
-  
+
     // Clear previous errors
     const errorDiv = document.querySelector('.error');
     errorDiv.style.display = 'none';
     errorDiv.textContent = '';
-  
-    // Validate fields (add your validation logic here)
+
+    // Validate fields
     const username = document.getElementById('username').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -64,42 +90,33 @@
       errorDiv.style.display = 'block';
       return;
     }
-  
-    // Resize and upload profile picture
+
+    // Only append the file if it was resized and selected
     const fileInput = document.getElementById('profile_picture');
+    const formData = new FormData(this); // Use form data from the form
     if (fileInput.files.length > 0) {
-      const resizedImage = await resizeImage(fileInput.files[0]);
-      // Create a FormData object and append the fields including the resized image
-      const formData = new FormData();
-      formData.append('username', username);
-      formData.append('email', email);
-      formData.append('password', password);
-      formData.append('profile_picture', resizedImage, 'profile_picture.jpg');
-  
-      // Send the form data with the resized image to the server
-      fetch('./register.php', {
-        method: 'POST',
-        body: formData,
-      }).then(response => {
-        if (response.ok) {
-          // Handle success response
-          window.location.href = './login.html'; // Redirect or show a success message
-        } else {
-          // Handle server-side validation errors
-          errorDiv.textContent = 'Registration failed. Please try again.';
-          errorDiv.style.display = 'block';
-        }
-      }).catch(error => {
-        console.error('Error:', error);
-        errorDiv.textContent = 'An error occurred. Please try again.';
-        errorDiv.style.display = 'block';
-      });
-    } else {
-      errorDiv.textContent = 'Please upload a profile picture.';
-      errorDiv.style.display = 'block';
+      // Append the original file (Consider if you want to use the resized image instead)
+      formData.append('profile_picture', fileInput.files[0], 'profile_picture.jpg');
     }
+
+    // Send the form data to the server
+    fetch('./register.php', {
+      method: 'POST',
+      body: formData,
+    }).then(response => {
+      if (response.ok) {
+        window.location.href = './login.html';
+      } else {
+        errorDiv.textContent = 'Registration failed. Please try again.';
+        errorDiv.style.display = 'block';
+      }
+    }).catch(error => {
+      console.error('Error:', error);
+      errorDiv.textContent = 'An error occurred. Please try again.';
+      errorDiv.style.display = 'block';
+    });
   });
-  
+
   function resizeImage(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -107,47 +124,43 @@
         const imgElement = document.createElement('img');
         imgElement.src = event.target.result;
         imgElement.onload = function() {
-          // Set the dimensions of the canvas / final image
           const canvasWidth = 200;
           const canvasHeight = 200;
-  
+
           const canvas = document.createElement('canvas');
           canvas.width = canvasWidth;
           canvas.height = canvasHeight;
           const ctx = canvas.getContext('2d');
-  
-          // Calculate the best fit size for the image
-          // This will center the image in the canvas and crop or letterbox it as necessary
+
           const dimensions = calculateBestFitSize(imgElement.width, imgElement.height, canvasWidth, canvasHeight);
-  
-          // Draw the image centered on the canvas
+
           ctx.drawImage(imgElement, dimensions.sx, dimensions.sy, dimensions.sWidth, dimensions.sHeight, 0, 0, canvasWidth, canvasHeight);
-  
+
           ctx.canvas.toBlob((blob) => {
             resolve(blob);
-          }, 'image/jpeg', 0.75); // Adjust the quality of the resized image
+          }, 'image/jpeg', 0.75);
         };
       };
       reader.onerror = error => reject(error);
       reader.readAsDataURL(file);
     });
   }
-  
+
   function calculateBestFitSize(srcWidth, srcHeight, maxWidth, maxHeight) {
-    let ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
-    let width = srcWidth * ratio;   // New width based on the ratio
-    let height = srcHeight * ratio; // New height based on the ratio
-    let x = (maxWidth - width) / 2; // Center the image along X
-    let y = (maxHeight - height) / 2; // Center the image along Y
-  
+    const ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+    const width = srcWidth * ratio;
+    const height = srcHeight * ratio;
+    const x = (maxWidth - width) / 2;
+    const y = (maxHeight - height) / 2;
+
     return {
-      sx: x > 0 ? 0 : -x / ratio, // Source X
-      sy: y > 0 ? 0 : -y / ratio, // Source Y
+      sx: x > 0 ? 0 : -x / ratio,
+      sy: y > 0 ? 0 : -y / ratio,
       sWidth: x > 0 ? srcWidth : maxWidth / ratio,
       sHeight: y > 0 ? srcHeight : maxHeight / ratio
     };
-  }  
-  
+  }
 </script>
+
 </body>
 </html>

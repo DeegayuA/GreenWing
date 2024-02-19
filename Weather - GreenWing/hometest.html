@@ -61,8 +61,8 @@
                     </form>
                 </div>
                 <div class="profile-info">
-                    <img src="https://via.placeholder.com/150" alt="Profile Picture" class="profile-pic">
-                    <span class="profile-name">Deeghayu Suwahas</span>
+                    <img src="" alt="Profile Picture" class="profile-pic" id="profile-pic">
+                    <span class="profile-name" id="profile-name">#</span>
                 </div>
             </header>
             <div class="content">
@@ -348,7 +348,7 @@
                                 return response.json();
                             })
                             .then(data => {
-                                console.log('Data received:', data);
+                                // console.log('Data received:', data);
 
                                 // Update HTML elements with data
                                 document.querySelector('.real-time-temp').textContent = data.temperature + '°C';
@@ -371,12 +371,52 @@
                                     ('0' + createdDate.getHours()).slice(-2) + ':' +
                                     ('0' + createdDate.getMinutes()).slice(-2);
                                 document.querySelector('.real-time').textContent = formattedDate;
+
+                                
                             })
                             .catch(error => {
-                                console.error('Error fetching data:', error);
+                                console.error('Error fetching weather data:', error);
                             });
+                            fetch('./login.php', {
+                                method: 'POST'
+                            })
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error('Network response was not ok ' + response.statusText);
+                                }
+                                return response.text(); // Response is expected as text, not JSON
+                            })
+                            .then(idData => {
+                                console.log('Session UserID:', idData);
+                                // Modify the URL of the fetch request to include idData
+                                fetch('./home.php?id=' + idData) // Change the URL dynamically
+                                .then(response => {
+                                    if (!response.ok) {
+                                        throw new Error('Network response was not ok ' + response.statusText);
+                                    }
+                                    return response.json();                            
+                                })
+                                .then(userData => {
+                                    console.log('User Data:', userData);
+                                    document.getElementById('profile-name').innerText = userData.username;
+                                    document.getElementById('profile-pic').src = userData.profile_picture;
+                                })
+                                .catch(error => {
+                                    console.error('Error fetching profile data:', error);
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error fetching ID:', error);
+                            });                            
+
                     });
+
                 </script>
+
+                
+                
+                
+                
                 <script>
                     // Function to display or hide the warning message
                     function toggleRotateWarning() {

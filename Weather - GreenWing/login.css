@@ -54,6 +54,7 @@
   #loginForm input[type="email"],
   #RegisterForm input[type="text"],
   #RegisterForm input[type="password"],
+  #RegisterForm input[type="file"],
   #RegisterForm input[type="email"] {
     background-color: var(--input-background);
     border: 1px solid var(--input-border);

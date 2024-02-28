@@ -12,7 +12,7 @@
 // Constants
 #define DEFAULT_VREF    1100        // Default VREF value for ADC calibration
 #define uS_TO_S_FACTOR  1000000     // Conversion from microseconds to seconds
-#define TIME_TO_SLEEP   107.5         // Time to sleep in seconds
+#define TIME_TO_SLEEP   109         // Time to sleep in seconds
 
 SemaphoreHandle_t syncSemaphore;
 
@@ -49,9 +49,31 @@ const float CONVERSION_FACTOR = 0.4;
 // Boot Counter
 RTC_DATA_ATTR int bootCount = 0;
 
-// Function Declarations
+// Global variable declarations
+int ldrValue = 0;
+int waterLevelValue = 0;
+int soilMoistureValue = 0;
+float rain = 0;
+String PROJECT_API_KEY = "GreenWing";  // Replace with your actual API key
+const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";  // Replace with your actual server name
+// const char* SERVER_NAME = "http://green-wing.scienceontheweb.net/sensordata.php";
+esp_adc_cal_characteristics_t *adc_chars;
+double batteryVoltage;
+float batteryPercentage = 0.0;
+String batteryStatus = "Unknown";
+bool uploadEnabled = false;
+bool loggingEnabled = true; // Variable to track logging state
+
+// Rain Sensor Variables
+const int BUCKET_VOLUME_ML = 15;  // Volume of each bucket in milliliters
+
+void Core0Task(void *pvParameters);
+void Core1Task(void *pvParameters);
+void setup();
+void loop();
 void connectToWiFi();
 void setupOTA();
+void uploadData();
 void readDHT();
 void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse);
 void pulseCounter();
@@ -59,18 +81,13 @@ float calculateWindSpeed(unsigned long pulseCount, unsigned long timeInterval);
 void readWindSpeed();
 void batteryMonitor();
 void goToDeepSleep();
-
-// Global variable declarations
-int ldrValue = 0;
-int waterLevelValue = 0;
-int soilMoistureValue = 0;
-String PROJECT_API_KEY = "GreenWing";  // Replace with your actual API key
-//const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";  // Replace with your actual server name
-const char* SERVER_NAME = "http://green-wing.scienceontheweb.net/sensordata.php";
-esp_adc_cal_characteristics_t *adc_chars;
-double batteryVoltage;
-float batteryPercentage = 0.0;
-String batteryStatus = "Unknown";
+void logSensorData();
+void handleCommands();
+void saveLoggingState(bool state);
+bool loadLoggingState();
+void resetCalibration(const char* sensorName);
+void checkForRecalibrationCommand();
+float calculateRain();
 
 void Core0Task(void *pvParameters) {
   connectToWiFi();
@@ -89,23 +106,24 @@ void Core1Task(void *pvParameters) {
   for (;;) {
     readDHT();
     readSensor(LDR_PIN, "LDR", ldrValue, true);
-    readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, false);
+    readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
     readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
     readWindSpeed();
     batteryMonitor();
+    handleCommands(); // Check for user commands
+    if (uploadEnabled) {
+      uploadData(); // Upload sensor data if enabled
+    }
     xSemaphoreGive(syncSemaphore); // Signal completion
     vTaskDelete(NULL); // End task
     delay(500);
   }
 }
 
-
-
 void setup() {
-  
   Serial.begin(115200);
   Serial.println("ESP32 serial initialized");
-//  Dual core selection
+  // Dual core selection
   syncSemaphore = xSemaphoreCreateBinary();
   // Check if semaphore creation was successful
   if (syncSemaphore == NULL) {
@@ -116,21 +134,24 @@ void setup() {
 
   adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
-
+  
   // Initialize Wi-Fi
   connectToWiFi();
 
   // Initialize OTA
   setupOTA();
-  
+
   while (!Serial);
-  Serial.println("Type word recalibrate for sensor recalibration");
+  Serial.println("Type 'recalibrate' for sensor recalibration, 'log' for logging data, 'logout' to stop logging");
   checkForRecalibrationCommand();
+  handleCommands();
+  delay(2000);
+
+
 
   // Initialize a NTP client for Sri Lanka (UTC+5:30)
   // The offset is in seconds, so 5 hours and 30 minutes is 5*3600 + 30*60 = 19800 seconds
   configTime(19800, 0, "pool.ntp.org", "time.nist.gov");
-
 
   // Increment boot count and print
   ++bootCount;
@@ -146,37 +167,46 @@ void setup() {
   pinMode(CHARGING_PIN, INPUT);
   dht.begin();
   attachInterrupt(digitalPinToInterrupt(WIND_SENSOR_PIN), pulseCounter, FALLING);
-  delay(1000);  // Wait for 1 seconds
-  
+  delay(1000);  // Wait for 1 second
+
   // Allow a short time window for OTA updates
   unsigned long startMillis = millis();
-  while (millis() - startMillis < 2000) { // 5-second window for OTA
+  while (millis() - startMillis < 2000) { // 2-second window for OTA
     ArduinoOTA.handle();
     delay(100); // Short delay to avoid blocking
   }
 
-  Serial.println("___________________________________");
-  printLocalTime();
-  digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
-  delay(1000);  // Wait for 1 seconds
+  // Load logging state from flash memory
+  loggingEnabled = loadLoggingState();
 
-  // Proceed with the rest of the setup...
-  uploadData();
-  Serial.println("___________________________________");
-  digitalWrite(MOS_PIN, LOW);  // Turn MOSFET ON
-  delay(1000);  // Wait for 1 seconds
-  preferences.end();
-  goToDeepSleep();
+  // Proceed based on logging state
+  if (loggingEnabled) {
+    logSensorData();
+  } else {
+    // Regular operation
+    digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
+    delay(1000);  // Wait for 1 second
+  
+    uploadData();
+    Serial.println("___________________________________");
+    digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
+    delay(1000);  // Wait for 1 second
+    preferences.end();
+    goToDeepSleep();
+  }
 }
 
 void loop() {
-  // Empty - operation based on deep sleep
+  // If logging is enabled, keep logging sensor data
+  if (loggingEnabled) {
+    logSensorData();
+  }
 }
 
 void connectToWiFi() {
   preferences.begin("wifi", false);
-  String ssid = preferences.getString("ssid", "SLT FIBER");
-  String password = preferences.getString("password", "Deegayu2001");
+  String ssid = preferences.getString("ssid", "Greenwing");
+  String password = preferences.getString("password", "12345678");
 
   Serial.println("Connecting to WiFi");
   WiFi.begin(ssid.c_str(), password.c_str());
@@ -210,8 +240,6 @@ void setupOTA() {
 
   ArduinoOTA.begin();
 }
-
-
 void uploadData() {
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi not connected");
@@ -220,23 +248,24 @@ void uploadData() {
 
   readDHT();
   readSensor(LDR_PIN, "LDR", ldrValue, true); // Inverse mapping for LDR
-  readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, false);
+  readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
   readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
   readWindSpeed();
   batteryMonitor();
+
+  // Calculate rain
+  rain = calculateRain();  // Pass the time taken for the bucket to fill
 
   // Construct data for HTTP POST request
   String sensorData = "api_key=" + PROJECT_API_KEY +
                       "&light_intensity=" + String(ldrValue) +
                       "&temperature=" + String(dht.readTemperature()) +
                       "&humidity=" + String(dht.readHumidity()) +
-                      "&rain=" + String(waterLevelValue) +
+                      "&rain=" + String(rain) +
                       "&wind=" + String(windSpeed) +
                       "&soil_moisture=" + String(soilMoistureValue) +
                       "&battery_percentage=" + String(batteryPercentage) +
                       "&battery_status=" + batteryStatus;
-  //                      "&battery_status=" + batteryVoltage;
-
 
   WiFiClient client;
   HTTPClient http;
@@ -263,8 +292,8 @@ void readDHT() {
   if (isnan(humidity) || isnan(temperature)) {
     Serial.println("Failed to read from DHT sensor!");
   } else {
-    Serial.println("Temperature: " + String(temperature) + "°C");
-    Serial.println("Humidity: " + String(humidity) + "%");
+    // Serial.println("Temperature: " + String(temperature) + "°C");
+    // Serial.println("Humidity: " + String(humidity) + "%");
   }
 }
 
@@ -309,7 +338,7 @@ void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse)
   // Constrain the value to ensure it's within 0-100
   sensorValue = constrain(mappedValue, 0, 100);
 
-  Serial.println(String(sensorName) + " Value: " + String(sensorValue) + "%");
+  // Serial.println(String(sensorName) + " Value: " + String(sensorValue) + "%");
   
   if (sensorValue == lastValue) {
         sameValueCount++;
@@ -354,7 +383,54 @@ void checkForRecalibrationCommand() {
   }
   delay(3000);  // Wait for 3 seconds
 }
+void handleCommands() {
+  if (Serial.available() > 0) {
+    String input = Serial.readStringUntil('\n');
+    if (input.equalsIgnoreCase("log")) {
+      digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
+      loggingEnabled = true; // Enable logging
+      saveLoggingState(true); // Save logging state to flash memory
+    } else if (input.equalsIgnoreCase("logout")) {
+      digitalWrite(MOS_PIN, LOW);  // Turn MOSFET ON
+      loggingEnabled = false; // Disable logging
+      saveLoggingState(false); // Save logging state to flash memory
+    }
+  }
+}
 
+void saveLoggingState(bool state) {
+  // Save logging state to flash memory
+  preferences.begin("logging", false); // Open NVS in read-write mode
+  preferences.putBool("enabled", state);
+  preferences.end();
+}
+
+bool loadLoggingState() {
+  // Load logging state from flash memory
+  preferences.begin("logging", true); // Open NVS in read-only mode
+  bool state = preferences.getBool("enabled", false);
+  preferences.end();
+  return state;
+}
+
+void logSensorData() {
+  digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
+  readDHT();
+  readSensor(LDR_PIN, "LDR", ldrValue, true); // Inverse mapping for LDR
+  // readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
+  readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
+  readWindSpeed();
+  batteryMonitor();
+  rain = calculateRain(); 
+  Serial.println("\nSensor Data:");
+  Serial.print(" | Temp: " + String(dht.readTemperature()) + "°C");
+  Serial.print(" | Hum: " + String(dht.readHumidity()) + "%");
+  Serial.print(" | Light: " + String(ldrValue) + "%");
+  Serial.print(" | Water: " + String(rain) + "mm/h");
+  Serial.print(" | Soil: " + String(soilMoistureValue) + "%");
+  Serial.print(" | Wind: " + String(windSpeed) + " km/h");
+  Serial.print(" | Battery: " + String(batteryPercentage) + "%" + batteryStatus);
+}
 
 void IRAM_ATTR pulseCounter() {
   pulseCount++;
@@ -379,7 +455,7 @@ void readWindSpeed() {
     lastPulseTime = currentTime;
 
     if (!isnan(windSpeed)) {
-      Serial.println("Wind Speed: " + String(windSpeed) + " km/h");
+      // Serial.println("Wind Speed: " + String(windSpeed) + " km/h");
     } else {
       Serial.println("Failed to read Wind Speed sensor!");
     }
@@ -433,8 +509,6 @@ void batteryMonitor() {
   lastVoltage = batteryVoltage;
 }
 
-
-
 void goToDeepSleep() {
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   Serial.println("Going to deep sleep now");
@@ -443,13 +517,39 @@ void goToDeepSleep() {
   esp_deep_sleep_start();
 }
 
-//### Explanation:
-//- **`readDHT` Function**: Reads temperature and humidity from the DHT sensor.
-//- **`readSensor` Function**: Generic function to read an analog sensor.
-//- **`pulseCounter` Function**: Interrupt service routine for the wind sensor.
-//- **`calculateWindSpeed` Function**: Calculates the wind speed in km/h.
-//- **`readWindSpeed` Function**: Reads and calculates the wind speed.
-//- **`batteryMonitor` Function**: Monitors and calculates battery voltage and status.
-//- **`goToDeepSleep` Function**: Puts the ESP32 into deep sleep mode.
-//
-//This code covers the functionality outlined in your original script with optimizations and structured functions for different tasks. Make sure to test this code with your specific hardware setup to ensure proper functionality.
+// New function to calculate rain
+float calculateRain() {
+  unsigned long startTime = 0;
+  unsigned long endTime = 0;
+  unsigned long timeTaken = 0;
+  bool bucketFilled = false;
+
+  // Loop until the bucket is filled (two consecutive changes in the water level)
+  while (!bucketFilled) {
+    // Read the water level sensor
+    readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
+    Serial.println("Water Level: " + String(waterLevelValue));
+    // Check if the water level sensor has changed
+    if (waterLevelValue >= 50) { // Assuming 50 as a threshold for detecting water level change
+      if (startTime == 0) {
+        startTime = millis(); // Record the start time
+      } else {
+        endTime = millis(); // Record the end time
+        timeTaken = endTime - startTime; // Calculate the time taken
+        bucketFilled = true; // Set the flag to exit the loop
+      
+    }
+  }
+  }
+
+  // Calculate rain based on the time taken to fill the bucket (15ml)
+  // Convert milliseconds to seconds
+  float timeInSeconds = timeTaken / 1000.0;
+  // Calculate the rain in ml/s
+  float rainRate = 15 / timeInSeconds;
+  // Convert to mm/h (1 ml = 1 mm for water)
+  float rain = rainRate * 3600;
+  Serial.println("Rain: " + String(rain));
+
+  return rain;
+}

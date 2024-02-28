@@ -10,20 +10,20 @@
 #include <freertos/semphr.h>
 
 // Constants
-#define DEFAULT_VREF    1100        // Default VREF value for ADC calibration
-#define uS_TO_S_FACTOR  1000000     // Conversion from microseconds to seconds
-#define TIME_TO_SLEEP   109         // Time to sleep in seconds
+#define DEFAULT_VREF 1100       // Default VREF value for ADC calibration
+#define uS_TO_S_FACTOR 1000000  // Conversion from microseconds to seconds
+#define TIME_TO_SLEEP 109      // Time to sleep in seconds
 
 SemaphoreHandle_t syncSemaphore;
 
 // Pin Definitions
-#define MOS_PIN             26
-#define DHT_PIN             25
-#define LDR_PIN             33
-#define WATER_LEVEL_PIN     35
-#define SOIL_MOISTURE_PIN   32
-#define WIND_SENSOR_PIN     34
-#define CHARGING_PIN        39
+#define MOS_PIN 26
+#define DHT_PIN 25
+#define LDR_PIN 33
+#define WATER_LEVEL_PIN 35
+#define SOIL_MOISTURE_PIN 32
+#define WIND_SENSOR_PIN 34
+#define CHARGING_PIN 39
 
 // Voltage thresholds
 const double MAX_VOLTAGE = 3.800;
@@ -54,21 +54,20 @@ int ldrValue = 0;
 int waterLevelValue = 0;
 int soilMoistureValue = 0;
 float rain = 0;
-String PROJECT_API_KEY = "GreenWing";  // Replace with your actual API key
-const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";  // Replace with your actual server name
-// const char* SERVER_NAME = "http://green-wing.scienceontheweb.net/sensordata.php";
-esp_adc_cal_characteristics_t *adc_chars;
+int inBuiltHallSensor = 0;
+String PROJECT_API_KEY = "GreenWing";
+// const char* SERVER_NAME = "http://localhost/greenwing/sensordata.php";  // Replace with your actual server name
+const char* SERVER_NAME = "http://green-wing.scienceontheweb.net/sensordata.php";
+esp_adc_cal_characteristics_t* adc_chars;
 double batteryVoltage;
 float batteryPercentage = 0.0;
 String batteryStatus = "Unknown";
 bool uploadEnabled = false;
-bool loggingEnabled = true; // Variable to track logging state
-
-// Rain Sensor Variables
+bool loggingEnabled = true;       // Variable to track logging state
 const int BUCKET_VOLUME_ML = 15;  // Volume of each bucket in milliliters
 
-void Core0Task(void *pvParameters);
-void Core1Task(void *pvParameters);
+void Core0Task(void* pvParameters);
+void Core1Task(void* pvParameters);
 void setup();
 void loop();
 void connectToWiFi();
@@ -89,20 +88,20 @@ void resetCalibration(const char* sensorName);
 void checkForRecalibrationCommand();
 float calculateRain();
 
-void Core0Task(void *pvParameters) {
+void Core0Task(void* pvParameters) {
   connectToWiFi();
   setupOTA();
-  
+
   for (;;) {
     // Handle OTA updates
     ArduinoOTA.handle();
     // Other tasks for Core 0
-    xSemaphoreGive(syncSemaphore); // Signal completion
-    vTaskDelete(NULL); // End task
-    delay(500); 
+    xSemaphoreGive(syncSemaphore);  // Signal completion
+    vTaskDelete(NULL);              // End task
+    delay(500);
   }
 }
-void Core1Task(void *pvParameters) {
+void Core1Task(void* pvParameters) {
   for (;;) {
     readDHT();
     readSensor(LDR_PIN, "LDR", ldrValue, true);
@@ -110,12 +109,12 @@ void Core1Task(void *pvParameters) {
     readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
     readWindSpeed();
     batteryMonitor();
-    handleCommands(); // Check for user commands
+    handleCommands();  // Check for user commands
     if (uploadEnabled) {
-      uploadData(); // Upload sensor data if enabled
+      uploadData();  // Upload sensor data if enabled
     }
-    xSemaphoreGive(syncSemaphore); // Signal completion
-    vTaskDelete(NULL); // End task
+    xSemaphoreGive(syncSemaphore);  // Signal completion
+    vTaskDelete(NULL);              // End task
     delay(500);
   }
 }
@@ -129,25 +128,22 @@ void setup() {
   if (syncSemaphore == NULL) {
     Serial.println("Failed to create semaphore");
   }
-  xTaskCreatePinnedToCore(Core0Task, "Core0Task", 10000, NULL, 1, NULL, 0); // Task for Core 0
-  xTaskCreatePinnedToCore(Core1Task, "Core1Task", 10000, NULL, 1, NULL, 1); // Task for Core 1
+  xTaskCreatePinnedToCore(Core0Task, "Core0Task", 10000, NULL, 1, NULL, 0);  // Task for Core 0
+  xTaskCreatePinnedToCore(Core1Task, "Core1Task", 10000, NULL, 1, NULL, 1);  // Task for Core 1
 
-  adc_chars = (esp_adc_cal_characteristics_t *)calloc(1, sizeof(esp_adc_cal_characteristics_t));
+  adc_chars = (esp_adc_cal_characteristics_t*)calloc(1, sizeof(esp_adc_cal_characteristics_t));
   esp_adc_cal_characterize(ADC_UNIT_1, ADC_ATTEN_DB_11, ADC_WIDTH_BIT_12, DEFAULT_VREF, adc_chars);
-  
+
   // Initialize Wi-Fi
   connectToWiFi();
-
   // Initialize OTA
   setupOTA();
 
   while (!Serial);
-  Serial.println("Type 'recalibrate' for sensor recalibration, 'log' for logging data, 'logout' to stop logging");
+  Serial.println("Type 'recalibrate' for sensor recalibration, 'log' for logging data");
   checkForRecalibrationCommand();
   handleCommands();
   delay(2000);
-
-
 
   // Initialize a NTP client for Sri Lanka (UTC+5:30)
   // The offset is in seconds, so 5 hours and 30 minutes is 5*3600 + 30*60 = 19800 seconds
@@ -171,34 +167,32 @@ void setup() {
 
   // Allow a short time window for OTA updates
   unsigned long startMillis = millis();
-  while (millis() - startMillis < 2000) { // 2-second window for OTA
+  while (millis() - startMillis < 2000) {  // 2-second window for OTA
     ArduinoOTA.handle();
-    delay(100); // Short delay to avoid blocking
+    delay(100);  // Short delay to avoid blocking
   }
 
   // Load logging state from flash memory
   loggingEnabled = loadLoggingState();
-
+  Serial.println("loggingEnabled: " + String(loggingEnabled));
   // Proceed based on logging state
-  if (loggingEnabled) {
+  while (loggingEnabled) {
     logSensorData();
-  } else {
-    // Regular operation
-    digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
-    delay(1000);  // Wait for 1 second
-  
-    uploadData();
-    Serial.println("___________________________________");
-    digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
-    delay(1000);  // Wait for 1 second
-    preferences.end();
-    goToDeepSleep();
+    return;
   }
+  // Regular operation
+  digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
+  delay(1000);                  // Wait for 1 second
+  uploadData();
+  Serial.println("___________________________________");
+  digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
+  delay(1000);                 // Wait for 1 second
+  preferences.end();
+  goToDeepSleep();
 }
 
 void loop() {
-  // If logging is enabled, keep logging sensor data
-  if (loggingEnabled) {
+    if (loggingEnabled) {
     logSensorData();
   }
 }
@@ -247,25 +241,14 @@ void uploadData() {
   }
 
   readDHT();
-  readSensor(LDR_PIN, "LDR", ldrValue, true); // Inverse mapping for LDR
+  readSensor(LDR_PIN, "LDR", ldrValue, true);  // Inverse mapping for LDR
   readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
   readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
   readWindSpeed();
   batteryMonitor();
-
-  // Calculate rain
   rain = calculateRain();  // Pass the time taken for the bucket to fill
-
   // Construct data for HTTP POST request
-  String sensorData = "api_key=" + PROJECT_API_KEY +
-                      "&light_intensity=" + String(ldrValue) +
-                      "&temperature=" + String(dht.readTemperature()) +
-                      "&humidity=" + String(dht.readHumidity()) +
-                      "&rain=" + String(rain) +
-                      "&wind=" + String(windSpeed) +
-                      "&soil_moisture=" + String(soilMoistureValue) +
-                      "&battery_percentage=" + String(batteryPercentage) +
-                      "&battery_status=" + batteryStatus;
+  String sensorData = "api_key=" + PROJECT_API_KEY + "&light_intensity=" + String(ldrValue) + "&temperature=" + String(dht.readTemperature()) + "&humidity=" + String(dht.readHumidity()) + "&rain=" + String(rain) + "&wind=" + String(windSpeed) + "&soil_moisture=" + String(soilMoistureValue) + "&battery_percentage=" + String(batteryPercentage) + "&battery_status=" + batteryStatus;
 
   WiFiClient client;
   HTTPClient http;
@@ -298,10 +281,10 @@ void readDHT() {
 }
 
 void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse) {
-  preferences.begin("calibration", false); // Open NVS in read-write mode
+  preferences.begin("calibration", false);  // Open NVS in read-write mode
 
-   static int lastValue = -1;
-   static int sameValueCount = 0;
+  static int lastValue = -1;
+  static int sameValueCount = 0;
 
   // Construct the key strings
   String minKey = String(sensorName) + "_min";
@@ -326,7 +309,7 @@ void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse)
 
   // Map the raw value to a 0-100 range based on the calibrated min-max range
   int mappedValue = 0;
-  if (maxRawValue != minRawValue) { // Prevent division by zero
+  if (maxRawValue != minRawValue) {  // Prevent division by zero
     mappedValue = (rawValue - minRawValue) * 100 / (maxRawValue - minRawValue);
   }
 
@@ -339,30 +322,30 @@ void readSensor(int pin, const char* sensorName, int& sensorValue, bool inverse)
   sensorValue = constrain(mappedValue, 0, 100);
 
   // Serial.println(String(sensorName) + " Value: " + String(sensorValue) + "%");
-  
-  if (sensorValue == lastValue) {
-        sameValueCount++;
-        if (sameValueCount >= 5) {
-            resetCalibration(sensorName);
-            sameValueCount = 0;
-            Serial.println(String(sensorName) + " calibration reset.");
-        }
-    } else {
-        sameValueCount = 0;
-    }
 
-    lastValue = sensorValue;
+  if (sensorValue == lastValue) {
+    sameValueCount++;
+    if (sameValueCount >= 5) {
+      resetCalibration(sensorName);
+      sameValueCount = 0;
+      Serial.println(String(sensorName) + " calibration reset.");
+    }
+  } else {
+    sameValueCount = 0;
+  }
+
+  lastValue = sensorValue;
 }
 void resetCalibration(const char* sensorName) {
-  preferences.begin("calibration", false); // Open NVS in read-write mode
+  preferences.begin("calibration", false);  // Open NVS in read-write mode
 
   // Construct the key strings for min and max values
   String minKey = String(sensorName) + "_min";
   String maxKey = String(sensorName) + "_max";
 
   // Reset calibration values
-  preferences.putInt(minKey.c_str(), 4095); // Set to default max ADC value
-  preferences.putInt(maxKey.c_str(), 0);    // Set to default min ADC value
+  preferences.putInt(minKey.c_str(), 4095);  // Set to default max ADC value
+  preferences.putInt(maxKey.c_str(), 0);     // Set to default min ADC value
 
   preferences.end();
 
@@ -371,6 +354,7 @@ void resetCalibration(const char* sensorName) {
 void checkForRecalibrationCommand() {
   if (Serial.available() > 0) {
     String input = Serial.readStringUntil('\n');
+
 
     if (input.equalsIgnoreCase("recalibrate")) {
       resetCalibration("LDR");
@@ -385,52 +369,69 @@ void checkForRecalibrationCommand() {
 }
 void handleCommands() {
   if (Serial.available() > 0) {
+    inBuiltHallSensor = hallRead();
     String input = Serial.readStringUntil('\n');
-    if (input.equalsIgnoreCase("log")) {
-      digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
-      loggingEnabled = true; // Enable logging
-      saveLoggingState(true); // Save logging state to flash memory
-    } else if (input.equalsIgnoreCase("logout")) {
+    if (input.equalsIgnoreCase("log") || inBuiltHallSensor < 0 || inBuiltHallSensor > 0) {
+      loggingEnabled = true;   // Enable logging
+      saveLoggingState(true);  // Save logging state to flash memory
+    } else {
       digitalWrite(MOS_PIN, LOW);  // Turn MOSFET ON
-      loggingEnabled = false; // Disable logging
-      saveLoggingState(false); // Save logging state to flash memory
+      loggingEnabled = false;      // Disable logging
+      saveLoggingState(false);
     }
   }
 }
 
 void saveLoggingState(bool state) {
   // Save logging state to flash memory
-  preferences.begin("logging", false); // Open NVS in read-write mode
+  preferences.begin("logging", false);  // Open NVS in read-write mode
   preferences.putBool("enabled", state);
   preferences.end();
 }
 
 bool loadLoggingState() {
   // Load logging state from flash memory
-  preferences.begin("logging", true); // Open NVS in read-only mode
+  preferences.begin("logging", true);  // Open NVS in read-only mode
   bool state = preferences.getBool("enabled", false);
   preferences.end();
   return state;
 }
 
 void logSensorData() {
+  inBuiltHallSensor = hallRead();
+
+  if (inBuiltHallSensor < 0 || inBuiltHallSensor > 0) {
+    digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
+    loggingEnabled = false;      // Disable logging
+    saveLoggingState(false);     // Save logging state to flash memory
+    return;                      // Exit the function
+  }
+
+  // If inBuiltHallSensor is greater than or equal to zero, continue logging sensor data
   digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
   readDHT();
-  readSensor(LDR_PIN, "LDR", ldrValue, true); // Inverse mapping for LDR
-  // readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
+  readSensor(LDR_PIN, "LDR", ldrValue, true);  // Inverse mapping for LDR
   readSensor(SOIL_MOISTURE_PIN, "Soil Moisture", soilMoistureValue, false);
   readWindSpeed();
   batteryMonitor();
-  rain = calculateRain(); 
-  Serial.println("\nSensor Data:");
+  rain = calculateRain();
+
+  // Update inBuiltHallSensor after logging data
+  inBuiltHallSensor = hallRead();
+
+  // Print debug information
+  Serial.println("\nDebug Mode: ");
   Serial.print(" | Temp: " + String(dht.readTemperature()) + "°C");
   Serial.print(" | Hum: " + String(dht.readHumidity()) + "%");
   Serial.print(" | Light: " + String(ldrValue) + "%");
   Serial.print(" | Water: " + String(rain) + "mm/h");
   Serial.print(" | Soil: " + String(soilMoistureValue) + "%");
   Serial.print(" | Wind: " + String(windSpeed) + " km/h");
-  Serial.print(" | Battery: " + String(batteryPercentage) + "%" + batteryStatus);
+  Serial.print(" | Battery: " + batteryStatus + " " + String(batteryPercentage) + "%");
+  Serial.print(" | inBuiltHallEccect: " + String(inBuiltHallSensor));
+  return;
 }
+
 
 void IRAM_ATTR pulseCounter() {
   pulseCount++;
@@ -476,20 +477,20 @@ void batteryMonitor() {
 
   // Get calibrated ADC reading
   uint32_t adc_reading = analogRead(CHARGING_PIN);
-  uint32_t millivolts = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars); // Calibrated reading
-  batteryVoltage = (float)millivolts / 1000.0 * 2 ; // Convert to volts -  *2 (voltage divider)
+  uint32_t millivolts = esp_adc_cal_raw_to_voltage(adc_reading, adc_chars);  // Calibrated reading
+  batteryVoltage = (float)millivolts / 1000.0 * 2;                           // Convert to volts -  *2 (voltage divider)
 
   // Calculate battery percentage
   batteryPercentage = (batteryVoltage - MIN_VOLTAGE) / (MAX_VOLTAGE - MIN_VOLTAGE) * 100.000;
   batteryPercentage = constrain(batteryPercentage, 0.000, 100.000);
 
   // Determine battery status
-  static float lastVoltage = batteryVoltage; // Initialize with the current reading
-  Serial.print("Current Voltage: ");
-  Serial.print(batteryVoltage, 10);
-  Serial.print("V, Last Voltage: ");
-  Serial.print(lastVoltage, 10);
-  Serial.println("V");
+  static float lastVoltage = batteryVoltage;  // Initialize with the current reading
+  // Serial.print("\nCurrent Voltage: ");
+  // Serial.print(batteryVoltage, 10);
+  // Serial.print("V, Last Voltage: ");
+  // Serial.print(lastVoltage, 10);
+  // Serial.println("V");
 
   // Check for significant change
   if (abs(batteryVoltage - lastVoltage) > VOLTAGE_THRESHOLD) {
@@ -499,11 +500,11 @@ void batteryMonitor() {
   }
 
   // Print battery information
-  Serial.print("Battery Percentage: ");
-  Serial.print(batteryPercentage);
-  Serial.println("%");
-  Serial.print("Battery Status: ");
-  Serial.println(batteryStatus);
+  // Serial.print("\nBattery Percentage: ");
+  // Serial.print(batteryPercentage);
+  // Serial.println("%");
+  // Serial.print("Battery Status: ");
+  // Serial.println(batteryStatus);
 
   // Update lastVoltage for the next loop
   lastVoltage = batteryVoltage;
@@ -513,43 +514,44 @@ void goToDeepSleep() {
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   Serial.println("Going to deep sleep now");
   Serial.println("Setup ESP32 to sleep for every " + String(TIME_TO_SLEEP) + " Seconds");
-  Serial.flush(); // Ensure all Serial data is sent before sleeping
+  Serial.flush();  // Ensure all Serial data is sent before sleeping
   esp_deep_sleep_start();
 }
 
-// New function to calculate rain
 float calculateRain() {
-  unsigned long startTime = 0;
+  unsigned long startTime = millis();  // Initialize startTime
   unsigned long endTime = 0;
   unsigned long timeTaken = 0;
   bool bucketFilled = false;
+  bool previousRainData = false;
+  unsigned long timeout = 2000;  // 2 seconds timeout
 
   // Loop until the bucket is filled (two consecutive changes in the water level)
-  while (!bucketFilled) {
+  while (!bucketFilled && (millis() - startTime < timeout)) {
     // Read the water level sensor
-    readSensor(WATER_LEVEL_PIN, "Water Level", waterLevelValue, true);
-    Serial.println("Water Level: " + String(waterLevelValue));
+    bool rainData = digitalRead(WATER_LEVEL_PIN);  // Corrected variable name to lowercase
+
     // Check if the water level sensor has changed
-    if (waterLevelValue >= 50) { // Assuming 50 as a threshold for detecting water level change
+    if (rainData != previousRainData) {  // If there's a change in rain data
       if (startTime == 0) {
-        startTime = millis(); // Record the start time
+        startTime = millis();  // Record the start time
       } else {
-        endTime = millis(); // Record the end time
-        timeTaken = endTime - startTime; // Calculate the time taken
-        bucketFilled = true; // Set the flag to exit the loop
-      
+        endTime = millis();               // Record the end time
+        timeTaken = endTime - startTime;  // Calculate the time taken
+        bucketFilled = true;              // Set the flag to exit the loop
+      }
     }
-  }
+
+    previousRainData = rainData;  // Update the previous rain data
   }
 
-  // Calculate rain based on the time taken to fill the bucket (15ml)
-  // Convert milliseconds to seconds
-  float timeInSeconds = timeTaken / 1000.0;
-  // Calculate the rain in ml/s
-  float rainRate = 15 / timeInSeconds;
-  // Convert to mm/h (1 ml = 1 mm for water)
-  float rain = rainRate * 3600;
-  Serial.println("Rain: " + String(rain));
-
-  return rain;
+  if (timeTaken > 0.0) {  // Avoid division by zero
+    // Calculate the rain in ml/s
+    float rainRate = 15.0 / timeTaken;  // Corrected to use floating point division
+    // Convert to mm/h (1 ml = 1 mm for water)
+    float rain = rainRate * 3600.0;  // Corrected to use floating point multiplication
+    return rain;
+  } else {
+    return 0.0;  // Return 0 if no time has elapsed (avoid division by zero)
+  }
 }

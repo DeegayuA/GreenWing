@@ -246,7 +246,7 @@ function updateWeatherBackground(weatherCondition) {
   const weatherBg = document.querySelector(".card__image");
   weatherBg.className = "card__image";
 
-  // weatherCondition = "Clear"
+  // weatherCondition = "Rain"
 
   switch (weatherCondition) {
     case "Rain":
@@ -333,10 +333,10 @@ function updateIrrigationStatus(temp, minTemp, rain, wind) {
   var irrigationStatusElement = document.getElementById("irrigationStatus");
 
   if (rain && rain["1h"]) {
-    if (rain["1h"] < 2.0) {
-      irrigationStatusElement.textContent = "Light rain detected (" + rain["1h"] + " mm/h). Proceed with caution.";
-    } else if (rain["1h"] >= 2 && rain["1h"] <= 7.5) {
-      irrigationStatusElement.textContent = "Moderate rain detected (" + rain["1h"] + " mm/h). Use caution when flying.";
+    if (rain["1h"] < 1.0) {
+      irrigationStatusElement.textContent = "Light rain detected (" + rain["1h"] + " mm/h). Fly with caution.";
+    } else if (rain["1h"] >= 1 && rain["1h"] <= 7.5) {
+      irrigationStatusElement.textContent = "Moderate rain detected (" + rain["1h"] + " mm/h). Use caution when flying drone.";
     } else if (rain["1h"] > 7.5 && rain["1h"] <= 50) {
       irrigationStatusElement.textContent = "Heavy rain detected (" + rain["1h"] + " mm/h). Avoid irrigation activities.";
     } else if (rain["1h"] > 50 && rain["1h"] <= 100) {

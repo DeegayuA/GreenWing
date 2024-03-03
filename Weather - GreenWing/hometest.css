@@ -78,6 +78,7 @@ a{
 }
 .tooltip {
   max-width: max-content;
+  /* bottom: 100px; */
   display: none;
   position: absolute;
   background-color: var(--content-active-color);

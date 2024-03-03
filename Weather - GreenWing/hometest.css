@@ -204,6 +204,7 @@ div#goog-gt-,
 #google_translate_element select {
   padding: 0.5rem 1rem;
   width: max-content;
+  text-align: center;
   border: none;
   background-color: var(--content-active-color);
   border-radius: var(--border-radius);

@@ -39,7 +39,80 @@
     background-color: var(--background-color);
     color: var(--text-color);
   }
-  
+  /* Google translate */
+.fixed-con {
+  z-index: 9724790009779558!important;
+  background-color: #0033ff;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow-y: auto;
+}
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-l4eHX-hSRGPd,
+.VIpgJd-yAWNEb-L7lbkb,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc {
+    display: none !important;
+}
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf{
+ z-index: 9724790009779!important;
+ top:0;
+ left:unset;
+ right:-5px;
+ display:none!important;
+ border-radius:50%;
+ border:2px solid gold;
+}
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO{
+  width:80px;
+  height:80px;
+}
+/*hide google translate link | logo | banner-frame */
+.goog-logo-link,.gskiptranslate,.goog-te-gadget span,.goog-te-banner-frame,#goog-gt-tt, .goog-te-balloon-frame,div#goog-gt-, .goog-te-menu-value span{
+  display: none!important;
+}
+.goog-te-gadget-simple{
+  background-color: var(--error-background);
+  border: 2px solid #eee;
+  border-radius:5px;
+  padding:5px 10px;
+  box-shadow:0 2px 10px -7px rgba(0,0,0,0.2);
+  font-size:0px;
+}
+.goog-te-gadget {
+  font-family: 'Quicksand', sans-serif !important;
+  color: transparent!important;
+  font-size:0px !important;
+}
+.goog-te-gadget-simple:before{
+  content:'Language';
+  font-size:12px;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value span:first-child{display: none;}
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value:before{content: 'Translate'}
+ 
+/*google translate Dropdown */
+
+#google_translate_element select{
+  padding: 0.5rem 1rem;
+  width: 100%;
+  margin-bottom: 1rem;
+  border: none;
+  background-color: var(--button-background);
+  border-radius: 0.5rem;
+  font-size: 14px;
+  text-align: center;
+  color: var(--button-text);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
   .login-side {
     background: var(--card-background);
   }
@@ -82,8 +155,16 @@
     align-items: center;
     justify-content: center;
   }
-  .card {
-    width: 800px;
+  .card-log {
+    max-width: 900px;
+    height: max-content;
+    display: flex;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0px 20px rgba(0, 0, 0, 0.2);
+  }
+  .card-reg {
+    max-width: 1200px;
     height: max-content;
     display: flex;
     border-radius: 0.5rem;
@@ -108,7 +189,6 @@
     text-align: center;
     z-index: 2;
     width: 80%;
-    text-shadow: red;
   }
   .signup-section {
     position: absolute;
@@ -224,7 +304,7 @@
     width: 100%;
     padding: 1rem;
     margin-bottom: 1rem;
-    background-color: #4CAF50;
+    background-color: var(--button-background);
     color: var(--button-text);
     border: none;
     border-radius: 0.5rem;
@@ -233,7 +313,7 @@
   
   #loginForm button.login-button:hover,
   #RegisterForm button.login-button:hover {
-    background-color: #45a049;
+    background-color: var(--button-background);
   }
   
   #loginForm .forgot-password,
@@ -246,11 +326,12 @@
   }
   #loginForm .forgot-password .span,
   #RegisterForm .forgot-password .span{
-    color: #4CAF50;
+    color: var(--button-background);
   }
 
   @media (max-width: 768px) {
-    .card {
+    .card-log,
+    .card-reg{
       width: 95vw;
       flex-direction: column;
       box-shadow: none;

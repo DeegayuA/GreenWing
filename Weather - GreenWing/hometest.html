@@ -10,6 +10,18 @@
     <link rel="stylesheet" href="./hometest.css">
     <link rel="stylesheet" href="./weathercard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script>
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                autoDisplay: false,
+                layout: google.translate.TranslateElement.InlineLayout.VERTICAL
+            }, 'google_translate_element');
+        }
+    </script>
+
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 </head>
 
 <body>
@@ -41,6 +53,14 @@
                 <div class="hamburger-menu">
                     <button id="sidebarToggle">&#9776;</button>
                 </div>
+                <div class="search-bar">
+
+                    <form class="weather__search">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search by Location, Vegetable, Metric..."
+                            class="weather__search-input">
+                    </form>
+                </div>
                 <div class="company-name">
                     <select id="location-selector">
                         <option value="Default">↓ </option>
@@ -51,15 +71,7 @@
 
                     </select>
                 </div>
-
-                <div class="search-bar">
-
-                    <form class="weather__search">
-                        <i class="fas fa-search"></i>
-                        <input type="text" placeholder="Search by Location, Vegetable, Metric..."
-                            class="weather__search-input">
-                    </form>
-                </div>
+                <div id="google_translate_element"></div>
                 <div class="profile-info">
                     <img src="" alt="Profile Picture" class="profile-pic" id="profile-pic">
                     <span class="profile-name" id="profile-name">#</span>
@@ -199,7 +211,7 @@
                     </section>
                 </div>
                 <div class="grid">
-                    <h1 class="header-title"> This Week's Progress ⬇</h1>
+                    <h1 class="header-title"> Plant Data ⬇</h1>
                     <section class="weekly-progress">
                         <div class="card chilly">
                             <div class="card-content">
@@ -210,7 +222,7 @@
 
                         <div class="card nut">
                             <div class="card-content">
-                                <div class="title"> Ground Nut</div>
+                                <div class="title"> Peanut</div>
                                 <div class="percentage">Growth: 60%</div>
                             </div>
                         </div>
@@ -236,11 +248,9 @@
                             <canvas id="predictive-analysis-chart"></canvas>
                         </div>
                         <div class="chart2">
-                            <h1>It's the perfect day for spraying</h1>
+                            <h1 id="irrigationStatus">Today the perfect day for Irrigation</h1>
                             <div class="chart2-container">
-                                <div class="chart2-div">
-                                    <div class="chart2-img"></div>
-                                </div>
+                               
                                 <div class="chart2-div">
                                     <div class="chart2-data">
                                         <span class="chart2-description">Real-Time Temperature</span>
@@ -252,8 +262,21 @@
                                         <span class="real__soil">pH 7</span>
 
                                     </div>
+                                    <div class="chart2-data" style="flex-direction: row; gap: 0.5rem;">
+                                        <button onclick="validateAndRedirect()"
+                                            class="control_button start">Start</button>
+                                        <button onmouseover="showTooltip()" onmouseout="hideTooltip()"
+                                            class="control_button info">More Info</button>
+                                        <div id="tooltip" class="tooltip">• Data Source - Openweather API <br>• Real
+                                            Time Location - University of Kelaniya, Sri Lanka <br>• <a
+                                                href="https://shorturl.at/fxzTY"> Click Here to view more</a></div>
+                                    </div>
+                                </div>
+                                <div class="chart2-div">
+                                    <div class="chart2-img"></div>
                                 </div>
                             </div>
+
                         </div>
                     </section>
                     <h1 class="header-title"> Real Time Data ⬇</h1>
@@ -299,45 +322,194 @@
 
 
                 <script src="./weathercard.js"></script>
-                <script src="./hometest.js"></script>
+                <script src="./weatherapp.js"></script>
+                <script>
+                    var tooltipTimer;
+
+                    function showTooltip() {
+                        var tooltip = document.getElementById("tooltip");
+                        tooltip.style.display = "block";
+                        tooltip.classList.add("fade-in-out"); // Add fade-in-out class
+                    }
+
+                    function hideTooltip() {
+                        tooltipTimer = setTimeout(function () {
+                            var tooltip = document.getElementById("tooltip");
+                            tooltip.classList.remove("fade-in-out");
+                            tooltip.style.display = "none";
+                            // Remove fade-in-out class
+                        }, 2000); // 2 seconds delay
+                    }
+
+                    // Cancel the tooltip hiding if mouse re-enters the button
+                    function cancelHideTooltip() {
+                        clearTimeout(tooltipTimer);
+                    }
+                </script>
+                <script>
+                    const delayTime = 5000; // 5 seconds
+                    const reducedDelayTime = delayTime - 1000;
+                    // Array of different parameters
+                    const parameters = ['Growth', 'Water', 'Plant Date', 'Harvest Date', 'Soil Type', 'Soil pH', 'Soil Moisture', 'Temperature', 'Humidity'];
+
+                    const texts = [
+                        "Find the freshest produce in your area!",
+                        "Discover Local Delights! Fresh, Seasonal Goods Just a Click Away",
+                        // Add more prebuilt texts here
+                        "Connect with Your Food! Meet the Growers Transforming Your Meals!",
+                        "Savor the Harvest! Exclusive Access to Homegrown Treasures Awaits!",
+                        "From Farm to Fork! Experience the Journey of Freshness!",
+                        "Taste the Real Flavors! Support Local Farms Today!",
+                        "Join the Locavore Movement! Exceptional Produce at Your Fingertips!",
+                        "Freshness Alert! Your Source for the Best Local Eats!",
+                        "Cultivate Goodness! Find Organic and Artisanal Foods Near You!",
+                        "Harvest the Benefits! Nourish Your Community by Shopping Local!",
+                        "Elevate Your Plate! Premium Local Produce Just Around the Corner!"
+                    ];
+
+                    const images = [
+                        "1.png",
+                        "2.png",
+                        "3.png"
+                        // Add more prebuilt image filenames here
+                    ];
+
+                    function getRandomIndex(arrayLength) {
+                        return Math.floor(Math.random() * arrayLength);
+                    }
+
+                    function updateContent() {
+                        const textElement = document.getElementById("dynamic-text");
+                        const container = document.getElementById("container");
+                        const percentages = document.querySelectorAll('.percentage');
+
+                        // Get random text and image
+                        const newText = texts[getRandomIndex(texts.length)];
+                        const newImage = images[getRandomIndex(images.length)];
+
+                        // Update text with fade animation
+                        textElement.classList.remove("fade-in-text");
+                        container.classList.remove("fade-in-background");
+
+                        // Trigger reflow to restart the animation
+                        void textElement.offsetWidth;
+                        void container.offsetWidth;
+
+                        textElement.textContent = newText;
+                        container.style.backgroundImage = `url('${newImage}')`;
+
+                        textElement.classList.add("fade-in-text");
+                        container.classList.add("fade-in-background");
+
+                        percentages.forEach((percentage, index) => {
+                            let currentIndex = 0;
+                            // Apply delay for animation
+                            setTimeout(() => {
+                                const currentText = percentage.textContent;
+                                const nextIndex = (currentIndex + 1) % parameters.length;
+                                // Update content with actual data
+                                percentage.classList.add('fade-in-out');
+                                // Access plant data for the current index and parameter
+                                percentage.textContent = parameters[nextIndex] + ': ' + plantData[index][parameters[nextIndex]];
+                                currentIndex = nextIndex; // Update currentIndex
+                            }, reducedDelayTime + (index * 300)); // Adjust timing to match CSS transition duration
+                        });
+
+                    }
+
+                    // Initial content update
+                    updateContent();
+
+                    // Update content every 5 seconds
+                    setInterval(updateContent, delayTime);
+
+                    // Sample data for each plant
+                    const plantData = [
+                        {
+                            'Growth': '80%',
+                            'Water': '240 ml',
+                            'Plant Date': '2024-02-15',
+                            'Harvest Date': '2024-06-25',
+                            'Soil Type': 'Loam',
+                            'Soil pH': '6.5',
+                            'Soil Moisture': 'Medium',
+                            'Temperature': '25°C',
+                            'Humidity': '70%'
+                        },
+                        {
+                            'Growth': '10%',
+                            'Water': '200 ml',
+                            'Plant Date': '2024-02-20',
+                            'Harvest Date': '2024-06-30',
+                            'Soil Type': 'Sandy loam',
+                            'Soil pH': '6.8',
+                            'Soil Moisture': 'Low',
+                            'Temperature': '26°C',
+                            'Humidity': '65%'
+                        },
+                        {
+                            'Growth': '75%',
+                            'Water': '250 ml',
+                            'Plant Date': '2024-02-10',
+                            'Harvest Date': '2024-06-20',
+                            'Soil Type': 'Clay loam',
+                            'Soil pH': '6.2',
+                            'Soil Moisture': 'High',
+                            'Temperature': '24°C',
+                            'Humidity': '75%'
+                        }
+                    ];
+                </script>
+
+
                 <script>
                     function updateSelectOptions() {
                         const locationSelector = document.getElementById("location-selector");
                         const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
-                
+
                         if (isMobile) {
                             // Update the first option for mobile view
                             locationSelector.options[0].value = "Default";
-                            locationSelector.options[0].text = "↓";
+                            locationSelector.options[0].text = "▼";
+                            locationSelector.options[1].value = "Chilly";
+                            locationSelector.options[1].text = "Chilly ▼";
+                            locationSelector.options[2].value = "Nut";
+                            locationSelector.options[2].text = "Peanut";
+                            locationSelector.options[3].value = "Mukunuwenna";
+                            locationSelector.options[3].text = "Mukunuwenna";
                         } else {
                             // Reset the first option for desktop view
                             locationSelector.options[0].value = "Chilly";
-                            locationSelector.options[0].text = "Chilly";
+                            locationSelector.options[0].text = "Chilly ▼";
+                            locationSelector.options[1].value = "Nut";
+                            locationSelector.options[1].text = "Peanut";
+                            locationSelector.options[2].value = "Mukunuwenna";
+                            locationSelector.options[2].text = "Mukunuwenna";
                         }
                     }
-                
+
                     function updateClassName() {
                         const companyDiv = document.querySelector(".company-name");
                         const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
-                
+
                         if (isMobile) {
                             companyDiv.className = "company-name2";
                         } else {
                             companyDiv.className = "company-name";
                         }
                     }
-                
+
                     // Initial call to set the select options and class name based on window width
                     updateSelectOptions();
                     updateClassName();
-                
+
                     // Add an event listener to adjust the select options and class name when the window is resized
-                    window.addEventListener("resize", function() {
+                    window.addEventListener("resize", function () {
                         updateSelectOptions();
                         updateClassName();
                     });
                 </script>
-                
+
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
                         fetch('./getdata.php')
@@ -372,14 +544,14 @@
                                     ('0' + createdDate.getMinutes()).slice(-2);
                                 document.querySelector('.real-time').textContent = formattedDate;
 
-                                
+
                             })
                             .catch(error => {
                                 console.error('Error fetching weather data:', error);
                             });
-                            fetch('./login.php', {
-                                method: 'POST'
-                            })
+                        fetch('./login.php', {
+                            method: 'POST'
+                        })
                             .then(response => {
                                 if (!response.ok) {
                                     throw new Error('Network response was not ok ' + response.statusText);
@@ -390,33 +562,33 @@
                                 console.log('Session UserID:', idData);
                                 // Modify the URL of the fetch request to include idData
                                 fetch('./home.php?id=' + idData) // Change the URL dynamically
-                                .then(response => {
-                                    if (!response.ok) {
-                                        throw new Error('Network response was not ok ' + response.statusText);
-                                    }
-                                    return response.json();                            
-                                })
-                                .then(userData => {
-                                    console.log('User Data:', userData);
-                                    document.getElementById('profile-name').innerText = userData.username;
-                                    document.getElementById('profile-pic').src = userData.profile_picture;
-                                })
-                                .catch(error => {
-                                    console.error('Error fetching profile data:', error);
-                                });
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok ' + response.statusText);
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(userData => {
+                                        console.log('User Data:', userData);
+                                        document.getElementById('profile-name').innerText = userData.username;
+                                        document.getElementById('profile-pic').src = userData.profile_picture;
+                                    })
+                                    .catch(error => {
+                                        console.error('Error fetching profile data:', error);
+                                    });
                             })
                             .catch(error => {
                                 console.error('Error fetching ID:', error);
-                            });                            
+                            });
 
                     });
 
                 </script>
 
-                
-                
-                
-                
+
+
+
+
                 <script>
                     // Function to display or hide the warning message
                     function toggleRotateWarning() {
@@ -457,7 +629,7 @@
                 </script>
                 <script>
                     function toggleScrolling() {
-                        const isMobileView = window.innerWidth <= 1279; // Adjust the breakpoint as needed
+                        const isMobileView = window.innerWidth <= 1679; // Adjust the breakpoint as needed
                         const body = document.body;
 
                         if (isMobileView) {
@@ -499,145 +671,144 @@
                     integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
                     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-                    <script>
-                        // Function to determine if the dark mode is active
-                        function isDarkMode() {
-                            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-                        }
-                    
-                        // Function to update chart colors based on the theme
-                        function updateChartColors(chart) {
-                            const darkMode = isDarkMode();
-                            const textColor = darkMode ? '#ddd' : '#333';
-                            const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
-                            const scales = ['x', 'y'];
-                    
-                            scales.forEach(scale => {
-                                chart.options.scales[scale].ticks.color = textColor;
-                                chart.options.scales[scale].grid.color = gridColor;
-                                chart.options.scales[scale].title.color = textColor;
-                            });
-                    
-                            chart.options.plugins.title.color = textColor;
-                            chart.options.plugins.legend.labels.color = textColor;
-                            chart.update();
-                        }
-                    
-                        // Function to generate dates based on the device type
-                        function generateDateRange() {
-                            const today = new Date();
-                            const dates = [];
-                            const isMobile = window.innerWidth <= 767; // Define mobile width threshold
-                            const dateCount = isMobile ? 4 : 10; // Set date count based on device type
-                            for (let i = -dateCount; i <= dateCount; i++) {
-                                let date = new Date();
-                                date.setDate(today.getDate() + i);
-                                dates.push(date);
-                            }
-                            return dates;
-                        }
-                    
-                        // Formatting date for display (e.g., "Jan 01" or "Today")
-                        function formatDate(date) {
-                            const today = new Date();
-                            const options = { month: 'short', day: 'numeric' };
-                            return date.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0) ? `Today` : date.toLocaleDateString('en-US', options);
-                        }
-                    
-                        // Generate data for the chart
-                        const dateRange = generateDateRange();
+                <script>
+                    // Function to determine if the dark mode is active
+                    function isDarkMode() {
+                        return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    }
+
+                    // Function to update chart colors based on the theme
+                    function updateChartColors(chart) {
+                        const darkMode = isDarkMode();
+                        const textColor = darkMode ? '#ddd' : '#333';
+                        const gridColor = darkMode ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)";
+                        const scales = ['x', 'y'];
+
+                        scales.forEach(scale => {
+                            chart.options.scales[scale].ticks.color = textColor;
+                            chart.options.scales[scale].grid.color = gridColor;
+                            chart.options.scales[scale].title.color = textColor;
+                        });
+
+                        chart.options.plugins.title.color = textColor;
+                        chart.options.plugins.legend.labels.color = textColor;
+                        chart.update();
+                    }
+
+                    // Function to generate dates based on the device type
+                    function generateDateRange() {
                         const today = new Date();
-                        let previousPredictedGrowth = Math.random() * 100;
-                        let previousActualGrowth = Math.random() * 100;
-                    
-                        const data = dateRange.map(date => {
-                            const predictedGrowth = previousPredictedGrowth + Math.random() * 10;
-                            const actualGrowth = date <= today ? previousActualGrowth + Math.random() * 10 : null;
-                            previousPredictedGrowth = predictedGrowth;
-                            previousActualGrowth = actualGrowth;
-                    
+                        const dates = [];
+                        const isMobile = window.innerWidth <= 767; // Define mobile width threshold
+                        const dateCount = isMobile ? 4 : 10; // Set date count based on device type
+                        for (let i = -dateCount; i <= dateCount; i++) {
+                            let date = new Date();
+                            date.setDate(today.getDate() + i);
+                            dates.push(date);
+                        }
+                        return dates;
+                    }
+
+                    // Formatting date for display (e.g., "Jan 01" or "Today")
+                    function formatDate(date) {
+                        const today = new Date();
+                        const options = { month: 'short', day: 'numeric' };
+                        return date.setHours(0, 0, 0, 0) === today.setHours(0, 0, 0, 0) ? `Today` : date.toLocaleDateString('en-US', options);
+                    }
+
+                    // Generate data for the chart
+                    const dateRange = generateDateRange();
+                    const today = new Date();
+                    let previousPredictedGrowth = Math.random() * 100;
+                    let previousActualGrowth = Math.random() * 100;
+
+                    const data = dateRange.map(date => {
+                        const predictedGrowth = previousPredictedGrowth + Math.random() * 10;
+                        const actualGrowth = date <= today ? previousActualGrowth + Math.random() * 10 : null;
+                        previousPredictedGrowth = predictedGrowth;
+                        previousActualGrowth = actualGrowth;
+
+                        return {
+                            date: formatDate(date),
+                            predictedGrowth: predictedGrowth,
+                            actualGrowth: actualGrowth
+                        };
+                    });
+
+                    // Function to generate new data based on the selected option
+                    function getDataForOption(option) {
+                        return dateRange.map(date => {
+                            const predictedGrowth = Math.random() * 100;
+                            const actualGrowth = date <= today ? Math.random() * 100 : null;
                             return {
                                 date: formatDate(date),
                                 predictedGrowth: predictedGrowth,
                                 actualGrowth: actualGrowth
                             };
                         });
-                    
-                        // Function to generate new data based on the selected option
-                        function getDataForOption(option) {
-                            return dateRange.map(date => {
-                                const predictedGrowth = Math.random() * 100;
-                                const actualGrowth = date <= today ? Math.random() * 100 : null;
-                                return {
-                                    date: formatDate(date),
-                                    predictedGrowth: predictedGrowth,
-                                    actualGrowth: actualGrowth
-                                };
-                            });
-                        }
-                    
-                        // Function to create a new chart or update the existing chart
-                        let chart = null;
-                        function createOrUpdateChart(newData) {
-                            const ctx = document.getElementById('predictive-analysis-chart').getContext('2d');
-                            chart = chart || new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: [],
-                                    datasets: [
-                                        {
-                                            label: 'Predicted Growth',
-                                            data: [],
-                                            borderColor: '#47815d',
-                                            borderDash: [5, 5],
-                                            tension: 0.1
-                                        },
-                                        {
-                                            label: 'Actual Growth',
-                                            data: [],
-                                            borderColor: '#8cfe99',
-                                            tension: 0.1
-                                        }
-                                    ]
+                    }
+
+                    // Function to create a new chart or update the existing chart
+                    let chart = null;
+                    function createOrUpdateChart(newData) {
+                        const ctx = document.getElementById('predictive-analysis-chart').getContext('2d');
+                        chart = chart || new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: [],
+                                datasets: [
+                                    {
+                                        label: 'Predicted Irrigation',
+                                        data: [],
+                                        borderColor: '#47815d',
+                                        borderDash: [5, 5],
+                                        tension: 0.1
+                                    },
+                                    {
+                                        label: 'Actual Irrigation',
+                                        data: [],
+                                        borderColor: '#8cfe99',
+                                        tension: 0.1
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                plugins: {
+                                    legend: { position: 'bottom' },
+                                    title: { display: true, text: 'Irrigation Over Days (ml)' },
                                 },
-                                options: {
-                                    responsive: true,
-                                    plugins: {
-                                        legend: { position: 'bottom' },
-                                        title: { display: true, text: 'Growth Analysis Over Days' },
-                                    },
-                                    scales: {
-                                        x: { title: { display: true, text: 'Date' }, grid: {}, ticks: {} },
-                                        y: { title: { display: true, text: 'Growth (cm)' }, grid: {}, ticks: {} }
-                                    },
-                                }
-                            });
-                    
-                            chart.data.labels = newData.map(row => row.date);
-                            chart.data.datasets[0].data = newData.map(row => row.predictedGrowth);
-                            chart.data.datasets[1].data = newData.map(row => row.actualGrowth);
-                            chart.update();
-                        }
-                    
-                        // Function to update the chart based on the selected option
-                        function updateChart() {
-                            const selectedOption = document.getElementById("location-selector").value;
-                            const newData = getDataForOption(selectedOption);
-                            createOrUpdateChart(newData);
-                        }
-                    
-                        // Add an event listener to the <select> element to detect changes
-                        document.getElementById("location-selector").addEventListener("change", updateChart);
-                    
-                        // Initialize chart with default data
-                        createOrUpdateChart(data);
-                    
-                        // Listen for changes in color scheme
-                        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                            updateChartColors(chart);
+                                scales: {
+                                    x: { title: { display: true, text: 'Date' }, grid: {}, ticks: {} },
+                                    y: { title: { display: true, text: 'Water (ml)' }, grid: {}, ticks: {} }
+                                },
+                            }
                         });
-                    </script>
-                    
+
+                        chart.data.labels = newData.map(row => row.date);
+                        chart.data.datasets[0].data = newData.map(row => row.predictedGrowth);
+                        chart.data.datasets[1].data = newData.map(row => row.actualGrowth);
+                        chart.update();
+                    }
+
+                    // Function to update the chart based on the selected option
+                    function updateChart() {
+                        const selectedOption = document.getElementById("location-selector").value;
+                        const newData = getDataForOption(selectedOption);
+                        createOrUpdateChart(newData);
+                    }
+
+                    // Add an event listener to the <select> element to detect changes
+                    document.getElementById("location-selector").addEventListener("change", updateChart);
+
+                    // Initialize chart with default data
+                    createOrUpdateChart(data);
+
+                    // Listen for changes in color scheme
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                        updateChartColors(chart);
+                    });
+                </script>
 
             </div>
         </div>

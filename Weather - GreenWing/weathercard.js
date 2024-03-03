@@ -52,7 +52,8 @@ function showError(error) {
 document.addEventListener("DOMContentLoaded", () => {
   getLocation();
   document.querySelector(".weather__search").addEventListener("submit", handleSearch);
-  getWeather(); 
+  getWeather();
+  updateIrrigationStatus(temp, minTemp, rain, wind);
 });
 
 function handleSearch(e) {
@@ -112,18 +113,18 @@ function handlePrecipitationAnimation(type) {
 
   // // Remove existing rain elements
   // removeWeatherAnimations(".weather__rain");
-  
+
 
   function addDrop(i) {
     if (i >= totalDrops) return;
-  
+
     const drop = createWeatherElement("div", "weather__rain");
     setRandomPosition(drop);
-  
+
     // Set the angle of the raindrop's path
     const angle = -20; // Adjust the angle as needed
     drop.style.transform = `rotate(${angle}deg)`;
-  
+
     if (type === "Rain") {
       // Use rectangular raindrop
       setRandomSize(drop, 2, 4, 20, 40);
@@ -132,16 +133,16 @@ function handlePrecipitationAnimation(type) {
       setRandomSize(drop, 2, 4, 10, 15);
       setRandomAnimationDuration(drop, 2, 3);
     }
-  
+
     rainContainer.appendChild(drop);
-  
+
     // Remove the oldest drop if the total exceeds the limit
     if (rainContainer.children.length > totalDrops) {
       rainContainer.removeChild(rainContainer.children[0]);
     }
-  
+
     setTimeout(() => addDrop(i + 1), 50);
-  }  
+  }
 
   addDrop(0);
 }
@@ -219,15 +220,17 @@ function getWeather() {
 }
 
 function handleWeatherData(data) {
-  if (data.main && data.name && data.weather && data.weather.length > 0) {
-    const { main, name, weather, dt, timezone } = data;
+  if (data.main && data.name && data.weather && data.weather.length > 0 && data.wind && data.wind.speed > 0) {
+    const { main, name, weather, dt, timezone, rain, wind } = data;
     allDescriptions = data.weather.map((w) => w.description);
     updateWeatherDisplay(name, main.temp, main.temp_min, main.temp_max, weather[0].main, dt, timezone);
     updateWeatherBackground(weather[0].main);
+    updateIrrigationStatus(main.temp, main.temp_min, rain, wind);
   } else {
     console.error("Error: Invalid data received from the API. Data:", JSON.stringify(data));
   }
 }
+
 
 function updateWeatherDisplay(city, temp, minTemp, maxTemp, condition, timestamp, timezone) {
   document.querySelector(".card__content__city").innerText = city;
@@ -272,7 +275,7 @@ function updateWeatherBackground(weatherCondition) {
       handleThunderstormAnimation();
       break;
     default:
-      // No additional class for other weather conditions
+    // No additional class for other weather conditions
   }
 
   // Remove rain and snow animations if it's not "Rain", "Drizzle", or "Snow"
@@ -323,3 +326,65 @@ function updateForecastIcon(dayIndex, iconCode) {
   }
 }
 
+var validatedState;
+var irrigationStatus;
+
+function updateIrrigationStatus(temp, minTemp, rain, wind) {
+  var irrigationStatusElement = document.getElementById("irrigationStatus");
+
+  if (rain && rain["1h"]) {
+    if (rain["1h"] < 2.0) {
+      irrigationStatusElement.textContent = "Light rain detected (" + rain["1h"] + " mm/h). Proceed with caution.";
+    } else if (rain["1h"] >= 2 && rain["1h"] <= 7.5) {
+      irrigationStatusElement.textContent = "Moderate rain detected (" + rain["1h"] + " mm/h). Use caution when flying.";
+    } else if (rain["1h"] > 7.5 && rain["1h"] <= 50) {
+      irrigationStatusElement.textContent = "Heavy rain detected (" + rain["1h"] + " mm/h). Avoid irrigation activities.";
+    } else if (rain["1h"] > 50 && rain["1h"] <= 100) {
+      irrigationStatusElement.textContent = "Very heavy rain detected (" + rain["1h"] + " mm/h). Avoid outdoor operations.";
+    } else {
+      irrigationStatusElement.textContent = "Extreme rain detected (" + rain["1h"] + " mm/h). Cease all outdoor activities.";
+    }
+    irrigationStatus = irrigationStatusElement.textContent;
+    validatedState = false;
+  } else if (wind.speed > 20) {
+    irrigationStatusElement.textContent = "Strong winds detected (" + wind.speed + " m/s). Avoid drone operation.";
+    irrigationStatus = irrigationStatusElement.textContent;
+    validatedState = false;
+  } else if (temp <= minTemp - 1 && temp >= minTemp + 1) {
+    irrigationStatusElement.textContent = "Temperature (" + temp + "°C) is outside today's acceptable range. Adjust irrigation plans.";
+    irrigationStatus = irrigationStatusElement.textContent;
+    validatedState = false;
+  } else {
+    irrigationStatusElement.textContent = "Very good situation for watering. Temperature is " + temp + "°C Now, Today's Min Temp is " + minTemp + "°C, Wind Speed is " + wind.speed + " m/s." + (rain && rain["1h"] ? " Rain is " + rain["1h"] + " mm/h" : " No rain detected");
+    irrigationStatus = irrigationStatusElement.textContent;
+    validatedState = true;
+  }
+}
+
+
+
+// Function to validate and redirect
+function validateAndRedirect() {
+  // validatedState = updateIrrigationStatus(temp, minTemp);
+  if (validatedState === true) {
+    // Show specific warning message
+    alert("Perfect Time for Irrigation: " + irrigationStatus);
+
+    // Set a timeout to redirect after 3 seconds (adjust as needed)
+    setTimeout(function () {
+      window.location.href = "./dronetest.html";
+    }, 3000);
+  } else {
+    // Show alert indicating the temperature is not within the acceptable range
+    alert("Warning: " + irrigationStatus);
+
+    // Redirect immediately
+    window.location.href = "./dronetest.html";
+  }
+}
+
+// Add event listener for DOMContentLoaded to ensure the script executes after the DOM is loaded
+document.addEventListener("DOMContentLoaded", function () {
+  // Attach onclick event to the button
+  document.getElementById("startButton").onclick = validateAndRedirect;
+});

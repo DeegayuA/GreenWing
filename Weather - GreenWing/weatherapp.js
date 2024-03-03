@@ -70,7 +70,7 @@ function getWeather() {
     fetch(`https://api.openweathermap.org/data/2.5/weather?q=${currCity}&appid=${API_KEY}&units=${units}`)
         .then(res => res.json())
         .then(data => {
-            // console.log(data);
+            console.log(data);
             city.innerHTML = `${data.name}, ${convertCountryCode(data.sys.country)}`;
             datetime.innerHTML = convertTimeStamp(data.dt, data.timezone); 
             weather__forecast.innerHTML = `<p>${data.weather[0].main}`;

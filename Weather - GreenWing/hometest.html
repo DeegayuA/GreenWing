@@ -19,6 +19,29 @@
             }, 'google_translate_element');
         }
     </script>
+    <script>
+        // Set the time limit for no mouse movement in milliseconds (2.2 minutes)
+        const inactivityTime = 2.2 * 60 * 1000; // 2.2 minutes
+        
+        let timeout;
+        
+        // Function to refresh the page
+        function refreshPage() {
+            location.reload();
+        }
+        
+        // Function to reset the timer when mouse movement is detected
+        function resetTimer() {
+            clearTimeout(timeout);
+            timeout = setTimeout(refreshPage, inactivityTime);
+        }
+        
+        // Event listener to detect mouse movement
+        document.addEventListener('mousemove', resetTimer);
+        
+        // Initialize the timer
+        resetTimer();
+        </script>
 
     <script type="text/javascript"
         src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
@@ -40,7 +63,7 @@
             </nav>
             <div id="container">
                 <div id="text-area">
-                    <p class="New_card_header"> New!</p>
+                    <p class="New_card_header"> Did you know?</p>
                     <p id="dynamic-text">New! Ready to contact real farmers near?</p>
                 </div>
             </div>
@@ -250,7 +273,7 @@
                         <div class="chart2">
                             <h1 id="irrigationStatus">Today the perfect day for Irrigation</h1>
                             <div class="chart2-container">
-                               
+
                                 <div class="chart2-div">
                                     <div class="chart2-data">
                                         <span class="chart2-description">Real-Time Temperature</span>
@@ -268,7 +291,7 @@
                                         <button onmouseover="showTooltip()" onmouseout="hideTooltip()"
                                             class="control_button info">More Info</button>
                                         <div id="tooltip" class="tooltip">• Data Source - Openweather API <br>• Real
-                                            Time Location - University of Kelaniya, Sri Lanka <br>• <a
+                                            Time Data Location - University of Kelaniya, Sri Lanka <br>• <a
                                                 href="https://shorturl.at/fxzTY"> Click Here to view more</a></div>
                                     </div>
                                 </div>
@@ -338,7 +361,7 @@
                             tooltip.classList.remove("fade-in-out");
                             tooltip.style.display = "none";
                             // Remove fade-in-out class
-                        }, 2000); // 2 seconds delay
+                        }, 3000); // 3 seconds delay
                     }
 
                     // Cancel the tooltip hiding if mouse re-enters the button
@@ -353,18 +376,31 @@
                     const parameters = ['Growth', 'Water', 'Plant Date', 'Harvest Date', 'Soil Type', 'Soil pH', 'Soil Moisture', 'Temperature', 'Humidity'];
 
                     const texts = [
-                        "Find the freshest produce in your area!",
-                        "Discover Local Delights! Fresh, Seasonal Goods Just a Click Away",
-                        // Add more prebuilt texts here
-                        "Connect with Your Food! Meet the Growers Transforming Your Meals!",
-                        "Savor the Harvest! Exclusive Access to Homegrown Treasures Awaits!",
-                        "From Farm to Fork! Experience the Journey of Freshness!",
-                        "Taste the Real Flavors! Support Local Farms Today!",
-                        "Join the Locavore Movement! Exceptional Produce at Your Fingertips!",
-                        "Freshness Alert! Your Source for the Best Local Eats!",
-                        "Cultivate Goodness! Find Organic and Artisanal Foods Near You!",
-                        "Harvest the Benefits! Nourish Your Community by Shopping Local!",
-                        "Elevate Your Plate! Premium Local Produce Just Around the Corner!"
+                        "Sustainable irrigation practices protect water sources and ecosystems.",
+                        "Reducing water usage through smart irrigation contributes to combating drought.",
+                        "Conserving water in agriculture helps mitigate the effects of climate change.",
+                        "Efficient irrigation systems play a vital role in preserving biodiversity.",
+                        "Implementing eco-friendly irrigation methods supports long-term soil health.",
+                        "Optimized water management reduces carbon emissions associated with pumping.",
+                        "Minimizing water wastage in farming aids in preventing soil erosion.",
+                        "Adopting precision irrigation techniques reduces the agricultural sector's carbon footprint.",
+                        "Smart irrigation technology promotes responsible use of natural resources.",
+                        "Sustainable farming practices, including intelligent irrigation, are key to climate resilience.",
+                        "Every drop saved through efficient irrigation contributes to global water conservation efforts.",
+"Solar-powered irrigation systems offer a sustainable solution for remote farming communities.",
+                        "Efficient water usage in agriculture is essential to ensure food security for a growing population.",
+                        "Solar energy-driven irrigation helps alleviate energy poverty in rural areas.",
+                        "Reducing water waste in agriculture is crucial to ensure water availability for future generations.",
+                        "Solar-powered pumps provide reliable water access, even in off-grid locations, aiding in hunger relief.",
+                        "Efficient irrigation technologies can increase crop yields, supporting efforts to end world hunger.",
+                        "Solar irrigation reduces reliance on fossil fuels, thus lowering CO2 emissions.",
+                        "Water-saving techniques in farming help combat climate change by reducing the agricultural sector's carbon footprint.",
+                        "By combining solar energy and water-saving practices, we can address both hunger and environmental sustainability simultaneously."
+
+
+
+
+
                     ];
 
                     const images = [
@@ -401,17 +437,19 @@
                         textElement.classList.add("fade-in-text");
                         container.classList.add("fade-in-background");
 
+                        let currentIndex = 0;
+
                         percentages.forEach((percentage, index) => {
-                            let currentIndex = 0;
+                            const currentText = percentage.textContent;
+                            const currentIndex = parameters.indexOf(currentText.split(':')[0].trim());
+                            const nextIndex = (currentIndex + 1) % parameters.length;
+
                             // Apply delay for animation
                             setTimeout(() => {
-                                const currentText = percentage.textContent;
-                                const nextIndex = (currentIndex + 1) % parameters.length;
                                 // Update content with actual data
                                 percentage.classList.add('fade-in-out');
                                 // Access plant data for the current index and parameter
                                 percentage.textContent = parameters[nextIndex] + ': ' + plantData[index][parameters[nextIndex]];
-                                currentIndex = nextIndex; // Update currentIndex
                             }, reducedDelayTime + (index * 300)); // Adjust timing to match CSS transition duration
                         });
 
@@ -467,6 +505,7 @@
                         const locationSelector = document.getElementById("location-selector");
                         const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
 
+
                         if (isMobile) {
                             // Update the first option for mobile view
                             locationSelector.options[0].value = "Default";
@@ -499,14 +538,29 @@
                         }
                     }
 
+                    const translate = document.getElementsByClassName("goog-te-combo");
+                    function translateSelectOptions() {
+
+                        const isMobile = window.innerWidth <= 767; // Adjust the breakpoint as needed
+                        if (isMobile) {
+                            translate.options[0].value = "Default";
+                            translate.options[0].text = "en";
+                        } else {
+                            translate.options[0].value = "Default";
+                            translate.options[0].text = "en";
+                        }
+                    }
+
                     // Initial call to set the select options and class name based on window width
                     updateSelectOptions();
                     updateClassName();
+                    translateSelectOptions();
 
                     // Add an event listener to adjust the select options and class name when the window is resized
                     window.addEventListener("resize", function () {
                         updateSelectOptions();
                         updateClassName();
+                        translateSelectOptions();
                     });
                 </script>
 

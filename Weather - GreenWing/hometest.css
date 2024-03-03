@@ -77,10 +77,9 @@ a{
   color: var(--dark-text-color);
 }
 .tooltip {
-  max-width: 300px;
+  max-width: max-content;
   display: none;
   position: absolute;
-  bottom: 120px;
   background-color: var(--content-active-color);
   border: 1px solid var(--sidebar-bg-color);
   color: var(--sidebar-text-color);
@@ -214,6 +213,13 @@ div#goog-gt-,
   -webkit-appearance: none;
   -moz-appearance: none;
 }
+/* mobile */
+@media screen and (max-width: 767px) {
+  #google_translate_element select {
+    padding: 0.5rem 0.5rem;
+    width: 40px;
+  }
+}
 
 /* Logo Styles */
 .logo {
@@ -269,6 +275,7 @@ div#goog-gt-,
 }
 
 #container {
+    backdrop-filter: blur(5px);
   width: 85%;
   aspect-ratio: 16/9;
   border-radius: var(--border-radius);
@@ -280,6 +287,7 @@ div#goog-gt-,
 }
 
 #text-area {
+  backdrop-filter: blur(5px);
   position: relative;
   z-index: 1;
   /* Ensure the text appears above the pseudo-element */
@@ -307,6 +315,7 @@ div#goog-gt-,
 }
 
 #dynamic-text {
+  padding: calc(var(--primary-spacing) / 2);
   animation: fadeIn 1s;
 }
 

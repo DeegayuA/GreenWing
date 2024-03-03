@@ -355,7 +355,7 @@ function updateIrrigationStatus(temp, minTemp, rain, wind) {
     irrigationStatus = irrigationStatusElement.textContent;
     validatedState = false;
   } else {
-    irrigationStatusElement.textContent = "Very good situation for watering. Temperature is " + temp + "°C Now, Today's Min Temp is " + minTemp + "°C, Wind Speed is " + wind.speed + " m/s." + (rain && rain["1h"] ? " Rain is " + rain["1h"] + " mm/h" : " No rain detected");
+    irrigationStatusElement.textContent = "Optimal conditions for watering. Now, Temperature is " + temp + "°C, Today's Min Temp is " + minTemp + "°C, Wind Speed is " + wind.speed + " m/s." + (rain && rain["1h"] ? " Rain is " + rain["1h"] + " mm/h" : " No rain detected");
     irrigationStatus = irrigationStatusElement.textContent;
     validatedState = true;
   }

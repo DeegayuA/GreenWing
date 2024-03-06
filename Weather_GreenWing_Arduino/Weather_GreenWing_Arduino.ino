@@ -12,7 +12,7 @@
 // Constants
 #define DEFAULT_VREF 1100       // Default VREF value for ADC calibration
 #define uS_TO_S_FACTOR 1000000  // Conversion from microseconds to seconds
-#define TIME_TO_SLEEP 109      // Time to sleep in seconds
+#define TIME_TO_SLEEP 111     // Time to sleep in seconds
 
 SemaphoreHandle_t syncSemaphore;
 
@@ -63,8 +63,8 @@ double batteryVoltage;
 float batteryPercentage = 0.0;
 String batteryStatus = "Unknown";
 bool uploadEnabled = false;
-bool loggingEnabled = true;       // Variable to track logging state
-const int BUCKET_VOLUME_ML = 15;  // Volume of each bucket in milliliters
+bool loggingEnabled = false;       // Variable to track logging state
+const int BUCKET_VOLUME_ML = 8;  // Volume of each bucket in milliliters
 
 void Core0Task(void* pvParameters);
 void Core1Task(void* pvParameters);
@@ -82,8 +82,6 @@ void batteryMonitor();
 void goToDeepSleep();
 void logSensorData();
 void handleCommands();
-void saveLoggingState(bool state);
-bool loadLoggingState();
 void resetCalibration(const char* sensorName);
 void checkForRecalibrationCommand();
 float calculateRain();
@@ -98,7 +96,7 @@ void Core0Task(void* pvParameters) {
     // Other tasks for Core 0
     xSemaphoreGive(syncSemaphore);  // Signal completion
     vTaskDelete(NULL);              // End task
-    delay(500);
+    delay(100);
   }
 }
 void Core1Task(void* pvParameters) {
@@ -115,7 +113,7 @@ void Core1Task(void* pvParameters) {
     }
     xSemaphoreGive(syncSemaphore);  // Signal completion
     vTaskDelete(NULL);              // End task
-    delay(500);
+    delay(100);
   }
 }
 
@@ -143,7 +141,7 @@ void setup() {
   Serial.println("Type 'recalibrate' for sensor recalibration, 'log' for logging data");
   checkForRecalibrationCommand();
   handleCommands();
-  delay(2000);
+  delay(1000);
 
   // Initialize a NTP client for Sri Lanka (UTC+5:30)
   // The offset is in seconds, so 5 hours and 30 minutes is 5*3600 + 30*60 = 19800 seconds
@@ -167,13 +165,12 @@ void setup() {
 
   // Allow a short time window for OTA updates
   unsigned long startMillis = millis();
-  while (millis() - startMillis < 2000) {  // 2-second window for OTA
+  while (millis() - startMillis < 1000) {  // 2-second window for OTA
     ArduinoOTA.handle();
     delay(100);  // Short delay to avoid blocking
   }
 
   // Load logging state from flash memory
-  loggingEnabled = loadLoggingState();
   Serial.println("loggingEnabled: " + String(loggingEnabled));
   // Proceed based on logging state
   while (loggingEnabled) {
@@ -182,11 +179,11 @@ void setup() {
   }
   // Regular operation
   digitalWrite(MOS_PIN, HIGH);  // Turn MOSFET ON
-  delay(1000);                  // Wait for 1 second
+  delay(500);                  // Wait for 1 second
   uploadData();
   Serial.println("___________________________________");
   digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
-  delay(1000);                 // Wait for 1 second
+  delay(500);                 // Wait for 1 second
   preferences.end();
   goToDeepSleep();
 }
@@ -365,45 +362,29 @@ void checkForRecalibrationCommand() {
       Serial.println("All sensors recalibrated.");
     }
   }
-  delay(3000);  // Wait for 3 seconds
+  delay(500);  // Wait for 3 seconds
 }
 void handleCommands() {
   if (Serial.available() > 0) {
     inBuiltHallSensor = hallRead();
     String input = Serial.readStringUntil('\n');
-    if (input.equalsIgnoreCase("log") || inBuiltHallSensor < 0 || inBuiltHallSensor > 0) {
-      loggingEnabled = true;   // Enable logging
-      saveLoggingState(true);  // Save logging state to flash memory
+    if (input.equalsIgnoreCase("log")) {
+          // if (input.equalsIgnoreCase("log") || inBuiltHallSensor < 0 || inBuiltHallSensor > 100) {
+
+      loggingEnabled = true;   // Enable logginglog
     } else {
       digitalWrite(MOS_PIN, LOW);  // Turn MOSFET ON
       loggingEnabled = false;      // Disable logging
-      saveLoggingState(false);
     }
   }
-}
-
-void saveLoggingState(bool state) {
-  // Save logging state to flash memory
-  preferences.begin("logging", false);  // Open NVS in read-write mode
-  preferences.putBool("enabled", state);
-  preferences.end();
-}
-
-bool loadLoggingState() {
-  // Load logging state from flash memory
-  preferences.begin("logging", true);  // Open NVS in read-only mode
-  bool state = preferences.getBool("enabled", false);
-  preferences.end();
-  return state;
 }
 
 void logSensorData() {
   inBuiltHallSensor = hallRead();
 
-  if (inBuiltHallSensor < 0 || inBuiltHallSensor > 0) {
+  if (inBuiltHallSensor < 0 || inBuiltHallSensor > 100) {
     digitalWrite(MOS_PIN, LOW);  // Turn MOSFET OFF
-    loggingEnabled = false;      // Disable logging
-    saveLoggingState(false);     // Save logging state to flash memory
+    loggingEnabled = false;      // Disable logging   
     return;                      // Exit the function
   }
 
@@ -524,7 +505,7 @@ float calculateRain() {
   unsigned long timeTaken = 0;
   bool bucketFilled = false;
   bool previousRainData = false;
-  unsigned long timeout = 2000;  // 2 seconds timeout
+  unsigned long timeout = 1000;  // 2 seconds timeout
 
   // Loop until the bucket is filled (two consecutive changes in the water level)
   while (!bucketFilled && (millis() - startTime < timeout)) {

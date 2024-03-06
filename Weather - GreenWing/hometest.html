@@ -281,8 +281,8 @@
 
                                     </div>
                                     <div class="chart2-data">
-                                        <span class="chart2-description">Real-Time Soil Moisture</span>
-                                        <span class="real__soil">pH 7</span>
+                                        <span class="chart2-description">Last Data Received At,</span>
+                                        <span class="real__time">time</span>
 
                                     </div>
                                     <div class="chart2-data" style="flex-direction: row; gap: 0.5rem;">
@@ -579,7 +579,6 @@
                                 // Update HTML elements with data
                                 document.querySelector('.real-time-temp').textContent = data.temperature + '°C';
                                 document.querySelector('.real-time-humidity').textContent = data.humidity + '%';
-                                document.querySelector('.real__soil').textContent = data.soil_moisture + ' %';
                                 document.querySelector('.battery__level').textContent = data.battery_percentage + ' %';
                                 document.querySelector('.real__sun').textContent = data.light_intensity + ' %';
                                 document.querySelector('.battery_charging').textContent = data.battery_status;
@@ -596,7 +595,7 @@
                                     createdDate.getFullYear() + ' at ' +
                                     ('0' + createdDate.getHours()).slice(-2) + ':' +
                                     ('0' + createdDate.getMinutes()).slice(-2);
-                                document.querySelector('.real-time').textContent = formattedDate;
+                                document.querySelector('.real__time').textContent = formattedDate;
 
 
                             })

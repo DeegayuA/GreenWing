@@ -20,7 +20,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
   })
   .then(data => {
     console.log('Success:', data);
-    if (data.includes('Invalid credentials')) {
+    if (data.includes('Invalid credentials' || 'User does not exist.')) {
       var errorMessage = document.querySelector('.error');
       errorMessage.textContent = data;
       errorMessage.style.display = 'block';
@@ -33,3 +33,4 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     console.error('Error:', error);
   });
 });
+

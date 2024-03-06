@@ -372,14 +372,14 @@ function validateAndRedirect() {
 
     // Set a timeout to redirect after 3 seconds (adjust as needed)
     setTimeout(function () {
-      window.location.href = "./dronetest.html";
+      window.location.href = "https://greenwing.netlify.app/";
     }, 3000);
   } else {
     // Show alert indicating the temperature is not within the acceptable range
     alert("Warning: " + irrigationStatus);
 
     // Redirect immediately
-    window.location.href = "./dronetest.html";
+    window.location.href = "https://greenwing.netlify.app/";
   }
 }
 

@@ -609,6 +609,7 @@ div#goog-gt-,
   display: flex;
   flex-direction: row;
   text-align: left;
+  margin-bottom: 0;
 }
 
 .chart2 h1 {

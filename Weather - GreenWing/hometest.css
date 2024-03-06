@@ -492,7 +492,7 @@ div#goog-gt-,
 
 .weather-forecast {
   display: flex;
-  flex: 1.5;
+  flex: 1.8;
   flex-direction: column;
 
   padding-bottom: var(--primary-spacing);
@@ -633,7 +633,7 @@ div#goog-gt-,
 
 
 .chart2-img {
-  width: 50px;
+  width: 10vw;
   aspect-ratio: 1;
   background-image: url('plant-dark.png');
   background-size: cover;

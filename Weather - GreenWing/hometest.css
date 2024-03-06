@@ -591,7 +591,7 @@ div#goog-gt-,
 }
 
 .chart1 {
-  flex: 2;
+  flex: 1.5;
 }
 
 .chartjs-render-monitor .todayLabel {
@@ -599,7 +599,7 @@ div#goog-gt-,
 }
 
 .chart2 {
-  flex: 1;
+  flex: 1.5;
   height: max-content;
   color: var(--dark-text-color);
   padding: var(--primary-spacing);

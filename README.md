@@ -23,7 +23,7 @@ https://github.com/DeegayuA/GreenWing/assets/63475473/6aa24a9d-0592-4e56-a6c4-cf
 
 
 **Environmental Monitoring:**<br>
-<br>Weather station sensors: List specific sensors measuring temperature, humidity, rainfall, wind speed, solar intensity, etc.
+<br>Weather station
 <br>Crop Detection & Analysis
 <br>Computer vision for identifying crop types (chilly plants, others)
 <br>Model specifications (e.g., YOLOv8) and its role in customized irrigation

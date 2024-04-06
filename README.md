@@ -1,15 +1,15 @@
 **GreenWing: Quadcopter-Based Intelligent Irrigation System**
 
-**Introduction**
+<br>**Introduction**
 
-The overall objective of the project is to make the system work so smoothly that any person without excellent knowledge on agriculture can engage in agriculture effectively which is based on tangible data regarding environmental conditions and irrigation effectiveness to gain a maximum crop yield. The project encompasses several objectives which are very important in agricultural aspects.
-• To enhance agricultural efficiency by developing an intelligent irrigation system that optimizes water usage and reduces wastage by delivering water directly to the areas where it's most needed.
-• Utilize weather data to ensure that water distribution is precisely matched to the requirements of specific crop species.
-• Provide useful information to farmers and agricultural managers to make informed decisions regarding their crops' care.
-• Utilize minimum energy resources in an effective way in agricultural practices.
+<br>The overall objective of the project is to make the system work so smoothly that any person without excellent knowledge on agriculture can engage in agriculture effectively which is based on tangible data regarding environmental conditions and irrigation effectiveness to gain a maximum crop yield. The project encompasses several objectives which are very important in agricultural aspects.
+<br>• To enhance agricultural efficiency by developing an intelligent irrigation system that optimizes water usage and reduces wastage by delivering water directly to the areas where it's most needed.
+<br>• Utilize weather data to ensure that water distribution is precisely matched to the requirements of specific crop species.
+<br>• Provide useful information to farmers and agricultural managers to make informed decisions regarding their crops' care.
+<br>• Utilize minimum energy resources in an effective way in agricultural practices.
 
 
-**Features**
+<br>**Features**
 <br> Presentation Video - https://youtu.be/jrrodnyfuZI
 <br> Weblink - http://green-wing.scienceontheweb.net/
 <br> username - test
@@ -22,44 +22,44 @@ https://github.com/DeegayuA/GreenWing/assets/63475473/6aa24a9d-0592-4e56-a6c4-cf
 <br> 
 
 
-**Environmental Monitoring:**
-Weather station sensors: List specific sensors measuring temperature, humidity, rainfall, wind speed, solar intensity, etc.
-Crop Detection & Analysis
-Computer vision for identifying crop types (chilly plants, others)
-Model specifications (e.g., YOLOv8) and its role in customized irrigation
-Precision Irrigation
-Targeted water delivery based on crop type and sensor data
-Irrigation system components (valves, pumps, etc.)
-Drone Integration
-Limited flight range, safety, and energy optimization considerations
-User-Friendly Web Application:
-Real-time dashboard with weather and irrigation data
-Intuitive controls (if applicable)
+**Environmental Monitoring:**<br>
+<br>Weather station sensors: List specific sensors measuring temperature, humidity, rainfall, wind speed, solar intensity, etc.
+<br>Crop Detection & Analysis
+<br>Computer vision for identifying crop types (chilly plants, others)
+<br>Model specifications (e.g., YOLOv8) and its role in customized irrigation
+<br>Precision Irrigation
+<br>Targeted water delivery based on crop type and sensor data
+<br>Irrigation system components (valves, pumps, etc.)
+<br>Drone Integration
+<br>Limited flight range, safety, and energy optimization considerations
+<br>User-Friendly Web Application:
+<br>Real-time dashboard with weather and irrigation data
+<br>Intuitive controls (if applicable)
 
-**Technologies Used**
-**Hardware:**
+**Technologies Used**<br>
+**Hardware:**<br>
 Microcontrollers (e.g., ESP32)
-Quadcopter model
-Sensors (list by type)
-Irrigation hardware
-Software
-Programming languages (e.g., Python)
-Computer vision libraries (e.g., OpenCV)
-IoT platforms (if applicable)
-Web development frameworks (e.g., React, Django)
-Database (e.g., MySQL)
+<br>Quadcopter model
+<br>Sensors (list by type)
+<br>Irrigation hardware
+<br>**Software**
+<br>Programming languages (e.g., Python)
+<br>Computer vision libraries (e.g., OpenCV)
+<br>IoT platforms (if applicable)
+<br>Web development frameworks (e.g., React, Django)
+<br>Database (e.g., MySQL)
 
 
 **Getting Started
-Prerequisites:**
-Hardware components
-Software dependencies
-Installation:
-Setting up the weather station
-Calibrating sensors
-Configuring the irrigation system
-Deploying the ML model
-Launching the web application
+<br>Prerequisites:**
+<br>Hardware components
+<br>Software dependencies
+<br>Installation:
+<br>Setting up the weather station
+<br>Calibrating sensors
+<br>Configuring the irrigation system
+<br>Deploying the ML model
+<br>Launching the web application
 
 
 **Usage**
@@ -70,11 +70,11 @@ Launching the web application
 Welcome contributions and collaboration.
 Guidelines for submitting issues and pull requests.
 
-**License**
+<br>**License**
 
-**Show Your Support**
+<br>**Show Your Support**
 
-Invite users to star the repository on GitHub if they find GreenWing valuable.
+<br>Invite users to star the repository on GitHub if they find GreenWing valuable.
 Provide links for contact or further information.
-Additional Notes
+<br><br>**Additional Notes**
 

@@ -8,18 +8,18 @@ The overall objective of the project is to make the system work so smoothly that
 • Provide useful information to farmers and agricultural managers to make informed decisions regarding their crops' care.
 • Utilize minimum energy resources in an effective way in agricultural practices.
 
+
+**Features**
+Presentation Video - https://youtu.be/jrrodnyfuZI
 Weblink - http://green-wing.scienceontheweb.net/
 username - test
 password - test
 
 
 <img width="1670" alt="Screenshot 2024-04-05 at 11 17 53" src="https://github.com/DeegayuA/GreenWing/assets/63475473/cc001c2a-7e6d-469d-a27b-e629f2567469">
-
-**Features**
-Presentation Video - https://youtu.be/jrrodnyfuZI
-
 ![IMG_5096](https://github.com/DeegayuA/GreenWing/assets/63475473/8df9d8c5-f5d0-4ce2-98b8-696593b39b76)
-https://github.com/DeegayuA/GreenWing/assets/63475473/bda6dab3-a136-462a-987a-15c4cd4a61e5
+https://github.com/DeegayuA/GreenWing/assets/63475473/4f76f985-87e9-4e22-9fa1-386d3fe401d9
+
 
 **Environmental Monitoring:**
 Weather station sensors: List specific sensors measuring temperature, humidity, rainfall, wind speed, solar intensity, etc.

@@ -2,14 +2,19 @@
 
 **Introduction**
 
-Overall objective of the project is to make the system work so smoothly that any person without excelled knowledge on agriculture can engage in agriculture effectively which is based on tangible data regarding environmental conditions and irrigation effectiveness to gain a maximum crop yield. The project encompasses several objectives which are very important in agricultural aspects.
+The overall objective of the project is to make the system work so smoothly that any person without excelled knowledge on agriculture can engage in agriculture effectively which is based on tangible data regarding environmental conditions and irrigation effectiveness to gain a maximum crop yield. The project encompasses several objectives which are very important in agricultural aspects.
 • To enhance agricultural efficiency by developing an intelligent irrigation system that optimizes water usage and reduces wastage by delivering water directly to the areas where it's most needed.
 • Utilize weather data to ensure that water distribution is precisely matched to the requirements of specific crop species.
 • Provide useful information to farmers and agricultural managers to make informed decisions regarding their crops' care.
 • Utilize minimum energy resources in an effective way in agricultural practices.
 
 **Features**
+![IMG_5096](https://github.com/DeegayuA/GreenWing/assets/63475473/8df9d8c5-f5d0-4ce2-98b8-696593b39b76)
+
 <img width="1670" alt="Screenshot 2024-04-05 at 11 17 53" src="https://github.com/DeegayuA/GreenWing/assets/63475473/cc001c2a-7e6d-469d-a27b-e629f2567469">
+
+https://github.com/DeegayuA/GreenWing/assets/63475473/bda6dab3-a136-462a-987a-15c4cd4a61e5
+
 
 **Environmental Monitoring:**
 Weather station sensors: List specific sensors measuring temperature, humidity, rainfall, wind speed, solar intensity, etc.
